@@ -123,20 +123,29 @@
             </objects>
             <point key="canvasLocation" x="435.87786259541986" y="31.690140845070424"/>
         </scene>
-        <!--Iniciar Sesión Vista-->
+        <!--Login Access View Controller-->
         <scene sceneID="bzf-H8-6ng">
             <objects>
-                <viewController storyboardIdentifier="LoginAccessVC" title="Iniciar Sesión Vista" id="dGP-OD-z6r" customClass="LoginAccessViewController" customModule="ProyectoStacionate" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="LoginAccessVC" id="dGP-OD-z6r" customClass="LoginAccessViewController" customModule="ProyectoStacionate" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="net-rb-w0f">
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="HOLA CAPI👽" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="AIO-gL-sYg">
+                                <rect key="frame" x="73" y="212" width="266" height="156"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="29"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                        </subviews>
                         <viewLayoutGuide key="safeArea" id="b7g-d2-LDT"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                     </view>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="gau-W1-wyX" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1163" y="32"/>
+            <point key="canvasLocation" x="1162.5954198473282" y="31.690140845070424"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="Z25-7j-SkE">
