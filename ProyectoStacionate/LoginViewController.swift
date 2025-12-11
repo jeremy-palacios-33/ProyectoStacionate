@@ -56,28 +56,20 @@ class LoginViewController: UIViewController, UIPickerViewDelegate, UIPickerViewD
                 return
             }
 
-            // Verificación con Firebase
-            PhoneAuthProvider.provider().verifyPhoneNumber("+51" + identifier, uiDelegate: nil) { [weak self] verificationID, error in
-                guard let self = self else { return }
-                DispatchQueue.main.async {
-                    if let error = error {
-                        self.showAlert(title: "Error", message: error.localizedDescription)
-                        return
-                    }
+            // Código falso para prueba
+            let fakeCode = "123456"
+            UserDefaults.standard.set(fakeCode, forKey: "fakeVerificationCode")
+            UserDefaults.standard.set(identifier, forKey: "fakePhoneNumber")
 
-                    // Guardar verificationID
-                    UserDefaults.standard.set(verificationID, forKey: "authVerificationID")
-
-                    // Instanciar VerifyCodeViewController y hacer push
-                    let storyboard = UIStoryboard(name: "Main", bundle: nil)
-                    if let verifyVC = storyboard.instantiateViewController(withIdentifier: "VerifyCodeViewController") as? VerifyCodeViewController {
-                        self.navigationController?.pushViewController(verifyVC, animated: true)
-                    }
-                }
+            // Navegar al controlador de verificación
+            let storyboard = UIStoryboard(name: "Main", bundle: nil)
+            if let verifyVC = storyboard.instantiateViewController(withIdentifier: "VerifyCodeViewController") as? VerifyCodeViewController {
+                verifyVC.phoneNumber = "+51" + identifier
+                self.present(verifyVC, animated: true)
             }
 
         } else {
-            // Validar correo y contraseña
+            // LOGIN CON CORREO (Firebase)
             if !isValidEmail(identifier) {
                 showAlert(title: "Correo inválido", message: "Formato incorrecto")
                 return
@@ -87,7 +79,6 @@ class LoginViewController: UIViewController, UIPickerViewDelegate, UIPickerViewD
                 return
             }
 
-            // Login con email/password
             Auth.auth().signIn(withEmail: identifier, password: password) { [weak self] authResult, error in
                 guard let self = self else { return }
                 DispatchQueue.main.async {
@@ -96,10 +87,10 @@ class LoginViewController: UIViewController, UIPickerViewDelegate, UIPickerViewD
                         return
                     }
 
-                    // Instanciar LoginAccessViewController (Storyboard ID: LoginAccessVC)
                     let storyboard = UIStoryboard(name: "Main", bundle: nil)
                     if let accessVC = storyboard.instantiateViewController(withIdentifier: "LoginAccessVC") as? LoginAccessViewController {
-                        self.navigationController?.pushViewController(accessVC, animated: true)
+                        accessVC.modalPresentationStyle = .fullScreen
+                        self.present(accessVC, animated: true)
                     }
                 }
             }

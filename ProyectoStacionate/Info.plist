@@ -4,8 +4,6 @@
 <dict>
 	<key>Privacy — Location Always and When In Use Usage Description</key>
 	<string>La app requiere tu ubicación para centrar el mapa en tu posición actual.</string>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Necesito acceder a tu ubicación para mostrar tu posición en el mapa</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
@@ -25,5 +23,7 @@
 			</array>
 		</dict>
 	</dict>
+	<key>UIBackgroundModes</key>
+	<array/>
 </dict>
 </plist>
