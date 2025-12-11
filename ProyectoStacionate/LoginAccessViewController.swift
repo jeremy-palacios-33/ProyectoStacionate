@@ -4,10 +4,18 @@ import CoreLocation
 import FirebaseFirestore
 import FirebaseAuth
 
-class LoginAccessViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDelegate , UIGestureRecognizerDelegate{
+class LoginAccessViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDelegate , UIGestureRecognizerDelegate,
+    UISearchBarDelegate, UITableViewDelegate,
+    UITableViewDataSource{
     @IBOutlet weak var mapView: MKMapView!
     
+    @IBOutlet weak var barraBusqueda: UISearchBar!
     @IBOutlet weak var centerButtom: UIButton!
+    
+    @IBOutlet weak var resultsTable: UITableView!
+    
+    let completer = MKLocalSearchCompleter()
+    var searchResults: [MKLocalSearchCompletion] = []
     let locationManager = CLLocationManager()
     let db = Firestore.firestore()
 
@@ -28,10 +36,30 @@ class LoginAccessViewController: UIViewController, CLLocationManagerDelegate, MK
         mapView.addGestureRecognizer(longPress)
         mapView.delegate = self
         longPress.delegate = self
+        barraBusqueda.delegate = self
+        resultsTable.delegate = self
+        resultsTable.dataSource = self
+        resultsTable.isHidden = true
+        completer.delegate = self
+        completer.region = MKCoordinateRegion(
+            center: CLLocationCoordinate2D(latitude: -12.0464, longitude: -77.0428),
+            latitudinalMeters: 50000,
+            longitudinalMeters: 50000
+        )
         listenPoints()
     }
     
-    
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        if searchText.isEmpty {
+            searchResults.removeAll()
+            resultsTable.isHidden = true
+            resultsTable.reloadData()
+            return
+        }
+
+        completer.queryFragment = searchText
+    }
+
 
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         
@@ -154,5 +182,98 @@ class LoginAccessViewController: UIViewController, CLLocationManagerDelegate, MK
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer,
                            shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
         return true
+    }
+    
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        searchBar.resignFirstResponder()
+
+        guard let query = searchBar.text, !query.isEmpty else { return }
+
+        let request = MKLocalSearch.Request()
+        request.naturalLanguageQuery = query
+
+        let search = MKLocalSearch(request: request)
+        search.start { response, error in
+            if let error = error {
+                print("Error en búsqueda: \(error.localizedDescription)")
+                return
+            }
+
+            guard let response = response, let item = response.mapItems.first else {
+                print("No se encontraron resultados")
+                return
+            }
+
+            let coordinate = item.placemark.coordinate
+
+            // Centramos el mapa en el resultado
+            let region = MKCoordinateRegion(
+                center: coordinate,
+                latitudinalMeters: 800,
+                longitudinalMeters: 800
+            )
+            self.mapView.setRegion(region, animated: true)
+
+            // Agregar un pin temporal opcional
+            let annotation = MKPointAnnotation()
+            annotation.coordinate = coordinate
+            annotation.title = item.name ?? "Resultado"
+            self.mapView.addAnnotation(annotation)
+        }
+    }
+    
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return searchResults.count
+    }
+
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "cell") ??
+                   UITableViewCell(style: .subtitle, reuseIdentifier: "cell")
+
+        let result = searchResults[indexPath.row]
+        cell.textLabel?.text = result.title
+        cell.detailTextLabel?.text = result.subtitle
+
+        return cell
+    }
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let completion = searchResults[indexPath.row]
+
+        let request = MKLocalSearch.Request(completion: completion)
+        let search = MKLocalSearch(request: request)
+
+        search.start { response, error in
+            if let item = response?.mapItems.first {
+                let coord = item.placemark.coordinate
+
+                // Centrar mapa
+                let region = MKCoordinateRegion(center: coord, latitudinalMeters: 800, longitudinalMeters: 800)
+                self.mapView.setRegion(region, animated: true)
+
+                // Limpia resultados y oculta tabla
+                self.resultsTable.isHidden = true
+                self.barraBusqueda.resignFirstResponder()
+
+                // Pin temporal (si quieres)
+                let ann = MKPointAnnotation()
+                ann.coordinate = coord
+                ann.title = item.name
+                self.mapView.addAnnotation(ann)
+            }
+        }
+    }
+    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+        resultsTable.isHidden = true
+        searchResults.removeAll()
+        resultsTable.reloadData()
+    }
+
+
+}
+extension LoginAccessViewController: MKLocalSearchCompleterDelegate {
+    func completerDidUpdateResults(_ completer: MKLocalSearchCompleter) {
+        self.searchResults = completer.results
+        self.resultsTable.isHidden = searchResults.isEmpty
+        self.resultsTable.reloadData()
     }
 }

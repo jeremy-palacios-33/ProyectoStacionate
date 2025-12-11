@@ -303,8 +303,30 @@
                                 <rect key="frame" x="0.0" y="59" width="393" height="739"/>
                                 <standardMapConfiguration key="preferredConfiguration"/>
                             </mapView>
-                            <button opaque="NO" contentMode="center" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="41J-oB-CMk">
-                                <rect key="frame" x="313" y="738" width="60" height="60"/>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="2XH-k8-e3Q">
+                                <rect key="frame" x="330" y="165" width="56" height="35"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <state key="normal" title="Button"/>
+                                <buttonConfiguration key="configuration" style="plain" image="camera.fill" catalog="system"/>
+                                <connections>
+                                    <action selector="tiltMapButtonTapped:" destination="dGP-OD-z6r" eventType="touchUpInside" id="3Nr-EL-xO3"/>
+                                </connections>
+                            </button>
+                            <searchBar contentMode="redraw" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="f0m-yQ-5gU">
+                                <rect key="frame" x="0.0" y="697" width="393" height="44"/>
+                                <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
+                                <textInputTraits key="textInputTraits"/>
+                                <connections>
+                                    <outlet property="delegate" destination="dGP-OD-z6r" id="31I-DP-fXv"/>
+                                </connections>
+                            </searchBar>
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="bTi-Th-sOq">
+                                <rect key="frame" x="0.0" y="389" width="393" height="308"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                            </tableView>
+                            <button opaque="NO" contentMode="center" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="41J-oB-CMk">
+                                <rect key="frame" x="333" y="637" width="60" height="60"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="60" id="Nqa-fp-VC3"/>
                                     <constraint firstAttribute="width" constant="60" id="OWU-bH-Wx6"/>
@@ -331,15 +353,6 @@
                                     <action selector="centerMapButtonTapped:" destination="dGP-OD-z6r" eventType="touchUpInside" id="iht-6c-Xtd"/>
                                 </connections>
                             </button>
-                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="2XH-k8-e3Q">
-                                <rect key="frame" x="328" y="172" width="56" height="35"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <state key="normal" title="Button"/>
-                                <buttonConfiguration key="configuration" style="plain" image="camera.fill" catalog="system"/>
-                                <connections>
-                                    <action selector="tiltMapButtonTapped:" destination="dGP-OD-z6r" eventType="touchUpInside" id="3Nr-EL-xO3"/>
-                                </connections>
-                            </button>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="b7g-d2-LDT"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
@@ -353,13 +366,15 @@
                         </constraints>
                     </view>
                     <connections>
+                        <outlet property="barraBusqueda" destination="f0m-yQ-5gU" id="PD3-la-UBh"/>
                         <outlet property="centerButtom" destination="41J-oB-CMk" id="88r-Zt-xUO"/>
                         <outlet property="mapView" destination="AWW-mY-540" id="xCo-Da-axY"/>
+                        <outlet property="resultsTable" destination="bTi-Th-sOq" id="NUk-tD-bDd"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="gau-W1-wyX" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1569" y="328"/>
+            <point key="canvasLocation" x="1568.7022900763359" y="327.46478873239437"/>
         </scene>
         <!--Stacionate-->
         <scene sceneID="Z25-7j-SkE">
