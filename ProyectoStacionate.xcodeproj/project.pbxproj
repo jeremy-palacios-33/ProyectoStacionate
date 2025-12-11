@@ -9,6 +9,9 @@
 /* Begin PBXBuildFile section */
 		B76A6B392EE0EA7600B90A1B /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = B76A6B382EE0EA7600B90A1B /* FirebaseAuth */; };
 		B76A6B3B2EE0EA7600B90A1B /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = B76A6B3A2EE0EA7600B90A1B /* FirebaseCore */; };
+		B7A3F9212EEB673E00DC3259 /* FirebaseDatabase in Frameworks */ = {isa = PBXBuildFile; productRef = B7A3F9202EEB673E00DC3259 /* FirebaseDatabase */; };
+		B7A3F9232EEB673E00DC3259 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = B7A3F9222EEB673E00DC3259 /* FirebaseFirestore */; };
+		B7A3F9252EEB673E00DC3259 /* FirebaseFirestoreCombine-Community in Frameworks */ = {isa = PBXBuildFile; productRef = B7A3F9242EEB673E00DC3259 /* FirebaseFirestoreCombine-Community */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -41,7 +44,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B7A3F9212EEB673E00DC3259 /* FirebaseDatabase in Frameworks */,
+				B7A3F9232EEB673E00DC3259 /* FirebaseFirestore in Frameworks */,
 				B76A6B3B2EE0EA7600B90A1B /* FirebaseCore in Frameworks */,
+				B7A3F9252EEB673E00DC3259 /* FirebaseFirestoreCombine-Community in Frameworks */,
 				B76A6B392EE0EA7600B90A1B /* FirebaseAuth in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -87,6 +93,9 @@
 			packageProductDependencies = (
 				B76A6B382EE0EA7600B90A1B /* FirebaseAuth */,
 				B76A6B3A2EE0EA7600B90A1B /* FirebaseCore */,
+				B7A3F9202EEB673E00DC3259 /* FirebaseDatabase */,
+				B7A3F9222EEB673E00DC3259 /* FirebaseFirestore */,
+				B7A3F9242EEB673E00DC3259 /* FirebaseFirestoreCombine-Community */,
 			);
 			productName = ProyectoStacionate;
 			productReference = B7631B832ED8F8D100B0D9BF /* ProyectoStacionate.app */;
@@ -155,12 +164,10 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = ProyectoStacionate/ProyectoStacionate.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = ProyectoStacionate/Info.plist;
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Necesito acceder a tu ubicación para mostrar tu posición en el mapa";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
@@ -184,12 +191,10 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = ProyectoStacionate/ProyectoStacionate.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = ProyectoStacionate/Info.plist;
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Necesito acceder a tu ubicación para mostrar tu posición en el mapa";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
@@ -371,6 +376,21 @@
 			isa = XCSwiftPackageProductDependency;
 			package = B76A6B372EE0EA7600B90A1B /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseCore;
+		};
+		B7A3F9202EEB673E00DC3259 /* FirebaseDatabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B76A6B372EE0EA7600B90A1B /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseDatabase;
+		};
+		B7A3F9222EEB673E00DC3259 /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B76A6B372EE0EA7600B90A1B /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
+		B7A3F9242EEB673E00DC3259 /* FirebaseFirestoreCombine-Community */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B76A6B372EE0EA7600B90A1B /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = "FirebaseFirestoreCombine-Community";
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
