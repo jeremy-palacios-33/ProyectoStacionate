@@ -48,7 +48,27 @@ class LoginAccessViewController: UIViewController, CLLocationManagerDelegate, MK
         )
         listenPoints()
     }
-    
+    func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
+        if annotation is MKUserLocation { return nil }
+
+        let identifier = "PointAnnotationView"
+
+        var view = mapView.dequeueReusableAnnotationView(withIdentifier: identifier)
+            as? MKMarkerAnnotationView
+
+        if view == nil {
+            view = MKMarkerAnnotationView(annotation: annotation, reuseIdentifier: identifier)
+            view?.canShowCallout = true
+            view?.titleVisibility = .visible
+            view?.subtitleVisibility = .visible   // ✅ ESTA LÍNEA ES LA CLAVE
+        } else {
+            view?.annotation = annotation
+        }
+
+        return view
+    }
+
+
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         if searchText.isEmpty {
             searchResults.removeAll()
@@ -99,14 +119,18 @@ class LoginAccessViewController: UIViewController, CLLocationManagerDelegate, MK
                 let desc = data["description"] as? String ?? ""
                 let userId = data["userId"] as? String ?? ""
                 let docID = doc.documentID
+                let ratingAvg = data["ratingAvg"] as? Double ?? 0
+                let ratingCount = data["ratingCount"] as? Int ?? 0
+
+               
+
 
                 let annotation = PointAnnotation()
                 annotation.coordinate = CLLocationCoordinate2D(latitude: lat, longitude: lon)
                 annotation.title = title
-                annotation.subtitle = desc
                 annotation.documentID = docID
                 annotation.ownerID = userId
-
+                annotation.subtitle = "\(desc)\n⭐ \(String(format: "%.1f", ratingAvg)) (\(ratingCount))"
                 self.mapView.addAnnotation(annotation)
             }
         }
@@ -126,6 +150,7 @@ class LoginAccessViewController: UIViewController, CLLocationManagerDelegate, MK
             alert.addTextField { $0.placeholder = "Descripción" }
 
             alert.addAction(UIAlertAction(title: "Cancelar", style: .cancel))
+        
             alert.addAction(UIAlertAction(title: "Guardar", style: .default, handler: { _ in
                 
                 let title = alert.textFields?[0].text ?? "Sin título"
@@ -146,25 +171,90 @@ class LoginAccessViewController: UIViewController, CLLocationManagerDelegate, MK
     
     func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
         mapView.deselectAnnotation(view.annotation, animated: false)
-
         guard let annotation = view.annotation as? PointAnnotation else { return }
+        let pointId = annotation.documentID
 
-        let currentUserId = Auth.auth().currentUser?.uid ?? ""
+        // cargar comentarios
+        loadComments(for: pointId) { comments in
+            DispatchQueue.main.async {
+                var message = ""
+                for c in comments {
+                    message += "\(c.userName): \(c.text)\n\n"
+                }
+                if message.isEmpty { message = "No hay comentarios aún." }
 
-        let alert = UIAlertController(title: annotation.title ?? "",
-                                      message: annotation.subtitle ?? "",
-                                      preferredStyle: .actionSheet)
+                let alert = UIAlertController(title: annotation.title ?? "Comentarios",
+                                              message: message,
+                                              preferredStyle: .actionSheet)
 
-        if annotation.ownerID == currentUserId {
-            alert.addAction(UIAlertAction(title: "Eliminar punto", style: .destructive, handler: { _ in
-                self.deletePoint(documentID: annotation.documentID)
-            }))
+                // Agregar/editar comentario (usuario actual)
+                alert.addAction(UIAlertAction(title: "Agregar/Editar mi comentario", style: .default, handler: { _ in
+                    self.askForComment(existing: comments.first(where: { $0.userId == Auth.auth().currentUser?.uid }), pointId: pointId)
+                }))
+
+                // Si mi comentario existe, permitir eliminar
+                if let myComment = comments.first(where: { $0.userId == Auth.auth().currentUser?.uid }) {
+                    alert.addAction(UIAlertAction(title: "Eliminar mi comentario",
+                                                 style: .destructive,
+                                                 handler: { _ in
+
+                        let confirm = UIAlertController(
+                            title: "Confirmar",
+                            message: "¿Seguro que deseas eliminar tu comentario?",
+                            preferredStyle: .alert
+                        )
+
+                        confirm.addAction(UIAlertAction(title: "Cancelar", style: .cancel))
+                        confirm.addAction(UIAlertAction(title: "Eliminar", style: .destructive, handler: { _ in
+                            self.deleteMyComment(pointId: pointId) { err in
+                                if err == nil {
+                                    self.showMessage(message: "Comentario eliminado")
+                                }
+                            }
+                        }))
+
+                        self.present(confirm, animated: true)
+                    }))
+
+                }
+
+                alert.addAction(UIAlertAction(title: "Cerrar", style: .cancel))
+                alert.addAction(UIAlertAction(title: "Calificar ⭐", style: .default, handler: { _ in
+                    self.showRatingSheet(pointId: pointId)
+                }))
+
+                self.present(alert, animated: true)
+            }
         }
+    }
 
-        alert.addAction(UIAlertAction(title: "Cerrar", style: .cancel))
+    func askForComment(existing: Comment?, pointId: String) {
+        let alert = UIAlertController(title: existing == nil ? "Agregar comentario" : "Editar comentario",
+                                      message: nil,
+                                      preferredStyle: .alert)
+        alert.addTextField { tf in
+            tf.placeholder = "Escribe tu comentario"
+            tf.text = existing?.text
+        }
+        alert.addAction(UIAlertAction(title: "Cancelar", style: .cancel))
+        alert.addAction(UIAlertAction(title: "Guardar", style: .default, handler: { _ in
+            let text = alert.textFields?.first?.text ?? ""
+            if text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty { return }
+            self.addOrUpdateComment(pointId: pointId, text: text) { isUpdate, err in
+                if let err = err {
+                    print("Error guardando comentario: \(err)")
+                    return
+                }
 
+                self.showMessage(
+                    message: isUpdate ? "Comentario actualizado" : "Comentario agregado"
+                )
+            }
+
+        }))
         present(alert, animated: true)
     }
+
 
     
     
@@ -178,6 +268,24 @@ class LoginAccessViewController: UIViewController, CLLocationManagerDelegate, MK
         }
     }
     
+    func fetchCurrentUserFullName(completion: @escaping (String) -> Void) {
+        guard let uid = Auth.auth().currentUser?.uid else {
+            completion("Usuario")
+            return
+        }
+
+        db.collection("users").document(uid).getDocument { snapshot, error in
+            if let data = snapshot?.data() {
+                let name = data["name"] as? String ?? ""
+                let lastName = data["lastName"] as? String ?? ""
+                let fullName = "\(name) \(lastName)".trimmingCharacters(in: .whitespaces)
+
+                completion(fullName.isEmpty ? "Usuario" : fullName)
+            } else {
+                completion("Usuario")
+            }
+        }
+    }
     
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer,
                            shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
@@ -206,7 +314,6 @@ class LoginAccessViewController: UIViewController, CLLocationManagerDelegate, MK
 
             let coordinate = item.placemark.coordinate
 
-            // Centramos el mapa en el resultado
             let region = MKCoordinateRegion(
                 center: coordinate,
                 latitudinalMeters: 800,
@@ -214,7 +321,6 @@ class LoginAccessViewController: UIViewController, CLLocationManagerDelegate, MK
             )
             self.mapView.setRegion(region, animated: true)
 
-            // Agregar un pin temporal opcional
             let annotation = MKPointAnnotation()
             annotation.coordinate = coordinate
             annotation.title = item.name ?? "Resultado"
@@ -246,15 +352,15 @@ class LoginAccessViewController: UIViewController, CLLocationManagerDelegate, MK
             if let item = response?.mapItems.first {
                 let coord = item.placemark.coordinate
 
-                // Centrar mapa
+              
                 let region = MKCoordinateRegion(center: coord, latitudinalMeters: 800, longitudinalMeters: 800)
                 self.mapView.setRegion(region, animated: true)
 
-                // Limpia resultados y oculta tabla
+                
                 self.resultsTable.isHidden = true
                 self.barraBusqueda.resignFirstResponder()
 
-                // Pin temporal (si quieres)
+               
                 let ann = MKPointAnnotation()
                 ann.coordinate = coord
                 ann.title = item.name
@@ -267,7 +373,149 @@ class LoginAccessViewController: UIViewController, CLLocationManagerDelegate, MK
         searchResults.removeAll()
         resultsTable.reloadData()
     }
+    // MARK: - Comentarios: CRUD
 
+    // Cargar comentarios (puedes usar snapshot listener para real-time)
+    // Uso: loadComments(for: annotation.documentID) { comments in ... }
+    func loadComments(for pointId: String, completion: @escaping ([Comment]) -> Void) {
+        db.collection("points").document(pointId).collection("comments")
+          .order(by: "timestamp", descending: false)
+          .getDocuments { snapshot, error in
+            var comments: [Comment] = []
+            if let docs = snapshot?.documents {
+                for d in docs {
+                    let data = d.data()
+                    let comment = Comment(
+                        id: d.documentID,
+                        userId: data["userId"] as? String ?? "",
+                        userName: data["userName"] as? String ?? "Anon",
+                        text: data["text"] as? String ?? "",
+                        timestamp: data["timestamp"] as? Timestamp
+                    )
+                    comments.append(comment)
+                }
+            }
+            completion(comments)
+        }
+    }
+
+    // Añadir o actualizar comentario (document id = currentUser.uid -> garantiza uno por usuario)
+    func addOrUpdateComment(pointId: String, text: String, completion: ((Bool, Error?) -> Void)? = nil) {
+        guard let user = Auth.auth().currentUser else {
+            completion?(false, NSError(domain: "Auth", code: 0))
+            return
+        }
+
+        let commentRef = db.collection("points")
+            .document(pointId)
+            .collection("comments")
+            .document(user.uid)
+
+        fetchCurrentUserFullName { fullName in
+
+            commentRef.getDocument { snap, _ in
+                let isUpdate = snap?.exists == true
+
+                let data: [String: Any] = [
+                    "userId": user.uid,
+                    "userName": fullName,
+                    "text": text,
+                    "timestamp": FieldValue.serverTimestamp()
+                ]
+
+                commentRef.setData(data) { error in
+                    completion?(isUpdate, error)
+                }
+            }
+        }
+    }
+
+
+    // Eliminar comentario del usuario actual
+    func deleteMyComment(pointId: String, completion: ((Error?) -> Void)? = nil) {
+        guard let user = Auth.auth().currentUser else {
+            completion?(NSError(domain: "Auth", code: 0, userInfo: [NSLocalizedDescriptionKey: "No user"]))
+            return
+        }
+        db.collection("points").document(pointId)
+          .collection("comments").document(user.uid)
+          .delete { err in completion?(err) }
+    }
+    
+    func showRatingSheet(pointId: String) {
+        let sheet = UIAlertController(title: "Calificar lugar",
+                                      message: "Selecciona una calificación",
+                                      preferredStyle: .actionSheet)
+
+        for i in 1...5 {
+            sheet.addAction(UIAlertAction(title: "\(i) ⭐", style: .default, handler: { _ in
+                self.saveRating(pointId: pointId, stars: i)
+            }))
+        }
+
+        sheet.addAction(UIAlertAction(title: "Cancelar", style: .cancel))
+        present(sheet, animated: true)
+    }
+    
+    func saveRating(pointId: String, stars: Int) {
+        guard let user = Auth.auth().currentUser else { return }
+
+        let pointRef = db.collection("points").document(pointId)
+        let ratingRef = pointRef.collection("ratings").document(user.uid)
+
+        db.runTransaction({ transaction, errorPointer -> Any? in
+            let pointDoc: DocumentSnapshot
+            do {
+                pointDoc = try transaction.getDocument(pointRef)
+            } catch {
+                errorPointer?.pointee = error as NSError
+                return nil
+            }
+
+            let oldAvg = pointDoc.data()?["ratingAvg"] as? Double ?? 0
+            let oldCount = pointDoc.data()?["ratingCount"] as? Int ?? 0
+
+            let ratingDoc = try? transaction.getDocument(ratingRef)
+
+            var newAvg = oldAvg
+            var newCount = oldCount
+
+            if let oldStars = ratingDoc?.data()?["stars"] as? Int {
+                // 🔁 Usuario ya calificó → reemplaza
+                newAvg = ((oldAvg * Double(oldCount)) - Double(oldStars) + Double(stars)) / Double(oldCount)
+            } else {
+                // ➕ Nueva calificación
+                newCount += 1
+                newAvg = ((oldAvg * Double(oldCount)) + Double(stars)) / Double(newCount)
+            }
+
+            transaction.setData([
+                "stars": stars,
+                "timestamp": FieldValue.serverTimestamp()
+            ], forDocument: ratingRef)
+
+            transaction.updateData([
+                "ratingAvg": newAvg,
+                "ratingCount": newCount
+            ], forDocument: pointRef)
+
+            return nil
+        }) { _, error in
+            if let error = error {
+                print("Error rating: \(error)")
+            } else {
+                self.showMessage(message: "Calificación realizada")
+            }
+        }
+
+    }
+    func showMessage(title: String = "Éxito", message: String) {
+        let alert = UIAlertController(title: title,
+                                      message: message,
+                                      preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        present(alert, animated: true)
+    }
 
 }
 extension LoginAccessViewController: MKLocalSearchCompleterDelegate {
@@ -276,4 +524,6 @@ extension LoginAccessViewController: MKLocalSearchCompleterDelegate {
         self.resultsTable.isHidden = searchResults.isEmpty
         self.resultsTable.reloadData()
     }
+    
+
 }
