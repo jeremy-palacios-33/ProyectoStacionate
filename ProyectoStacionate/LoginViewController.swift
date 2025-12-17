@@ -1,112 +1,152 @@
 import UIKit
 import FirebaseAuth
 
-class LoginViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSource {
+class LoginViewController: UIViewController {
 
-    @IBOutlet weak var pickerLogin: UIPickerView!
+    // MARK: - Outlets
+    @IBOutlet weak var loginSegmented: UISegmentedControl!
     @IBOutlet weak var txtLogin: UITextField!
     @IBOutlet weak var txtPassword: UITextField!
     @IBOutlet weak var btnLogin: UIButton!
     @IBOutlet weak var btnNewUser: UIButton!
 
-    let loginOptions = ["Número Telefónico", "Correo Electrónico"]
+    // MARK: - Properties
     var selectedOption = "Número Telefónico"
 
+    // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        pickerLogin.delegate = self
-        pickerLogin.dataSource = self
-        pickerLogin.selectRow(0, inComponent: 0, animated: false)
-        updateLoginPlaceholder()
         title = "Iniciar Sesión"
+        setupUI()
+        updateLoginPlaceholder()
+        
+        // Contraseña oculta
+        txtPassword.isSecureTextEntry = true
     }
 
-    // MARK: - PickerView
-    func numberOfComponents(in pickerView: UIPickerView) -> Int { return 1 }
-    func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int { return loginOptions.count }
-    func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? { return loginOptions[row] }
-    func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
-        selectedOption = loginOptions[row]
+    // MARK: - UI Setup
+    func setupUI() {
+        loginSegmented.selectedSegmentIndex = 0
+        styleTextField(txtLogin)
+        styleTextField(txtPassword)
+
+        btnLogin.layer.cornerRadius = 12
+        btnLogin.setTitle("Continuar", for: .normal)
+        btnNewUser.setTitle("Crear cuenta", for: .normal)
+    }
+
+    func styleTextField(_ textField: UITextField) {
+        textField.layer.cornerRadius = 10
+        textField.layer.borderWidth = 1
+        textField.layer.borderColor = UIColor.systemGray4.cgColor
+        textField.backgroundColor = .systemBackground
+        let padding = UIView(frame: CGRect(x: 0, y: 0, width: 12, height: 0))
+        textField.leftView = padding
+        textField.leftViewMode = .always
+    }
+
+    // MARK: - Segmented Control
+    @IBAction func loginTypeChanged(_ sender: UISegmentedControl) {
+        selectedOption = sender.selectedSegmentIndex == 0
+            ? "Número Telefónico"
+            : "Correo Electrónico"
         updateLoginPlaceholder()
     }
 
     func updateLoginPlaceholder() {
         txtLogin.text = ""
-        if selectedOption == "Número Telefónico" {
-            txtLogin.placeholder = "Ingresa tu número (9 dígitos)"
-            txtLogin.keyboardType = .numberPad
-            txtPassword.isHidden = true
-        } else {
-            txtLogin.placeholder = "Ingresa tu correo electrónico"
-            txtLogin.keyboardType = .emailAddress
-            txtPassword.isHidden = false
+
+        UIView.animate(withDuration: 0.25) {
+            if self.selectedOption == "Número Telefónico" {
+                self.txtLogin.placeholder = "Número telefónico (9 dígitos)"
+                self.txtLogin.keyboardType = .numberPad
+                self.txtPassword.alpha = 0
+            } else {
+                self.txtLogin.placeholder = "Correo electrónico"
+                self.txtLogin.keyboardType = .emailAddress
+                self.txtPassword.alpha = 1
+            }
+            self.view.layoutIfNeeded()
         }
+
+        txtPassword.isHidden = selectedOption == "Número Telefónico"
     }
 
-    // MARK: - Botón Login
-    @IBAction func loginPressed(_ sender: Any) {
+    // MARK: - Login
+    @IBAction func loginPressed(_ sender: UIButton) {
         let identifier = txtLogin.text ?? ""
         let password = txtPassword.text ?? ""
 
         if selectedOption == "Número Telefónico" {
-            // Validar número telefónico
-            if !identifier.allSatisfy({ $0.isNumber }) || identifier.count != 9 {
-                showAlert(title: "Número inválido", message: "Debe tener 9 dígitos")
-                return
-            }
-
-            // Código falso para prueba
-            let fakeCode = "123456"
-            UserDefaults.standard.set(fakeCode, forKey: "fakeVerificationCode")
-            UserDefaults.standard.set(identifier, forKey: "fakePhoneNumber")
-
-            // Navegar al controlador de verificación
-            let storyboard = UIStoryboard(name: "Main", bundle: nil)
-            if let verifyVC = storyboard.instantiateViewController(withIdentifier: "VerifyCodeViewController") as? VerifyCodeViewController {
-                verifyVC.phoneNumber = "+51" + identifier
-                self.present(verifyVC, animated: true)
-            }
-
+            loginWithPhone(identifier)
         } else {
-            // LOGIN CON CORREO (Firebase)
-            if !isValidEmail(identifier) {
-                showAlert(title: "Correo inválido", message: "Formato incorrecto")
-                return
-            }
-            if password.isEmpty {
-                showAlert(title: "Contraseña vacía", message: "Ingresa tu contraseña")
-                return
-            }
+            loginWithEmail(identifier, password)
+        }
+    }
 
-            Auth.auth().signIn(withEmail: identifier, password: password) { [weak self] authResult, error in
-                guard let self = self else { return }
-                DispatchQueue.main.async {
-                    if let error = error {
-                        self.showAlert(title: "Error", message: error.localizedDescription)
-                        return
-                    }
+    func loginWithPhone(_ phone: String) {
+        // Para pruebas con código fake
+        guard phone.count == 9, phone.allSatisfy({ $0.isNumber }) else {
+            showAlert(title: "Número inválido", message: "Debe tener 9 dígitos")
+            return
+        }
 
-                    let storyboard = UIStoryboard(name: "Main", bundle: nil)
-                    if let accessVC = storyboard.instantiateViewController(withIdentifier: "LoginAccessVC") as? LoginAccessViewController {
-                        accessVC.modalPresentationStyle = .fullScreen
-                        self.present(accessVC, animated: true)
-                    }
+        UserDefaults.standard.set("123456", forKey: "fakeVerificationCode")
+        UserDefaults.standard.set(phone, forKey: "fakePhoneNumber")
+
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        if let verifyVC = storyboard.instantiateViewController(withIdentifier: "VerifyCodeViewController") as? VerifyCodeViewController {
+            verifyVC.phoneNumber = "+51" + phone
+            present(verifyVC, animated: true)
+        }
+    }
+
+    func loginWithEmail(_ email: String, _ password: String) {
+        guard isValidEmail(email) else {
+            showAlert(title: "Correo inválido", message: "Formato incorrecto")
+            return
+        }
+
+        guard !password.isEmpty else {
+            showAlert(title: "Contraseña vacía", message: "Ingresa tu contraseña")
+            return
+        }
+
+        Auth.auth().signIn(withEmail: email, password: password) { [weak self] _, error in
+            guard let self = self else { return }
+
+            DispatchQueue.main.async {
+                if let error = error {
+                    self.showAlert(title: "Error", message: error.localizedDescription)
+                    return
+                }
+
+                let storyboard = UIStoryboard(name: "Main", bundle: nil)
+                if let accessVC = storyboard.instantiateViewController(withIdentifier: "LoginAccessVC") as? LoginAccessViewController {
+                    accessVC.modalPresentationStyle = .fullScreen
+                    self.present(accessVC, animated: true)
                 }
             }
         }
     }
 
-    // MARK: - Validación de correo
+    // MARK: - Helpers
     func isValidEmail(_ email: String) -> Bool {
         let pattern = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}"
         return NSPredicate(format: "SELF MATCHES %@", pattern).evaluate(with: email)
     }
 
-    // MARK: - Alertas
     func showAlert(title: String, message: String) {
         let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "OK", style: .default))
         present(alert, animated: true)
+    }
+
+    // MARK: - Ir a crear cuenta
+    @IBAction func newUserPressed(_ sender: UIButton) {
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        if let registerVC = storyboard.instantiateViewController(withIdentifier: "RegisterViewController") as? RegisterViewController {
+            self.present(registerVC, animated: true)
+        }
     }
 }
