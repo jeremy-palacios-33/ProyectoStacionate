@@ -3,6 +3,7 @@ import MapKit
 import CoreLocation
 import FirebaseFirestore
 import FirebaseAuth
+import AVFoundation
 
 class LoginAccessViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDelegate , UIGestureRecognizerDelegate,
     UISearchBarDelegate, UITableViewDelegate,
@@ -11,15 +12,23 @@ class LoginAccessViewController: UIViewController, CLLocationManagerDelegate, MK
     
     @IBOutlet weak var barraBusqueda: UISearchBar!
     @IBOutlet weak var centerButtom: UIButton!
-    
+    var currentStepIndex: Int = 0
+
     @IBOutlet weak var resultsTable: UITableView!
     
     let completer = MKLocalSearchCompleter()
     var searchResults: [MKLocalSearchCompletion] = []
     let locationManager = CLLocationManager()
     let db = Firestore.firestore()
+    var currentRoute: MKRoute? = nil
+    var destinationCoordinate: CLLocationCoordinate2D? = nil
+    let speechSynthesizer = AVSpeechSynthesizer()
+    var searchRadiusMeters: Double = 1000.0
+    private var allPoints: [PointModel] = []
+    private var rangeCircle: MKCircle?
+    private var lastRefilterLocation: CLLocation?
+    private let minDistanceToRefilter: CLLocationDistance = 10
 
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
@@ -46,29 +55,49 @@ class LoginAccessViewController: UIViewController, CLLocationManagerDelegate, MK
             latitudinalMeters: 50000,
             longitudinalMeters: 50000
         )
+        // Llamamos a la versión modificada que filtra por rango
         listenPoints()
+        mapView.setUserTrackingMode(.followWithHeading, animated: true)
     }
     func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
         if annotation is MKUserLocation { return nil }
 
         let identifier = "PointAnnotationView"
-
-        var view = mapView.dequeueReusableAnnotationView(withIdentifier: identifier)
-            as? MKMarkerAnnotationView
+        var view = mapView.dequeueReusableAnnotationView(withIdentifier: identifier) as? MKMarkerAnnotationView
 
         if view == nil {
             view = MKMarkerAnnotationView(annotation: annotation, reuseIdentifier: identifier)
             view?.canShowCallout = true
             view?.titleVisibility = .visible
-            view?.subtitleVisibility = .visible   // ✅ ESTA LÍNEA ES LA CLAVE
+            view?.subtitleVisibility = .visible
         } else {
             view?.annotation = annotation
+        }
+
+        if let pointAnn = annotation as? PointAnnotation {
+            if pointAnn.ownerID == Auth.auth().currentUser?.uid {
+                view?.markerTintColor = .systemBlue
+            } else {
+                view?.markerTintColor = .systemRed
+            }
         }
 
         return view
     }
 
-
+    func locationManager(_ manager: CLLocationManager, didUpdateHeading newHeading: CLHeading) {
+        // Aquí obtienes el ángulo en grados respecto al norte
+        let heading = newHeading.trueHeading  // o .magneticHeading
+        
+        // Actualiza la cámara del mapa con ese heading
+        let camera = MKMapCamera(
+            lookingAtCenter: mapView.centerCoordinate,
+            fromDistance: 100,
+            pitch: 60,
+            heading: heading
+        )
+        mapView.setCamera(camera, animated: true)
+    }
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         if searchText.isEmpty {
             searchResults.removeAll()
@@ -82,8 +111,32 @@ class LoginAccessViewController: UIViewController, CLLocationManagerDelegate, MK
 
 
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+    
+        guard let userLocation = locations.last else { return }
+
+        if let destination = destinationCoordinate {
+            let distance = userLocation.distance(from: CLLocation(latitude: destination.latitude, longitude: destination.longitude))
+            if distance > 15 {
+                showRoute(to: destination)
+            }
+        }
+
         
+        if let last = lastRefilterLocation {
+            let moved = userLocation.distance(from: last)
+            if moved > minDistanceToRefilter {
+                lastRefilterLocation = userLocation
+                updateRangeCircle(at: userLocation.coordinate, radius: searchRadiusMeters)
+                updateAnnotationsForCurrentLocation(location: userLocation.coordinate)
+            }
+        } else {
+            
+            lastRefilterLocation = userLocation
+            updateRangeCircle(at: userLocation.coordinate, radius: searchRadiusMeters)
+            updateAnnotationsForCurrentLocation(location: userLocation.coordinate)
+        }
     }
+
 
     @IBAction func centerMapButtonTapped(_ sender: UIButton) {
         mapView.setUserTrackingMode(.follow, animated: true)
@@ -99,6 +152,7 @@ class LoginAccessViewController: UIViewController, CLLocationManagerDelegate, MK
             mapView.setCamera(camera, animated: true)
     }
     
+    
     func listenPoints() {
         db.collection("points").addSnapshotListener { snapshot, error in
             if let error = error {
@@ -108,8 +162,7 @@ class LoginAccessViewController: UIViewController, CLLocationManagerDelegate, MK
 
             guard let docs = snapshot?.documents else { return }
 
-            let anns = self.mapView.annotations.filter { !($0 is MKUserLocation) }
-            self.mapView.removeAnnotations(anns)
+            var loaded: [PointModel] = []
 
             for doc in docs {
                 let data = doc.data()
@@ -122,21 +175,33 @@ class LoginAccessViewController: UIViewController, CLLocationManagerDelegate, MK
                 let ratingAvg = data["ratingAvg"] as? Double ?? 0
                 let ratingCount = data["ratingCount"] as? Int ?? 0
 
-               
+                let p = PointModel(
+                    docID: docID,
+                    lat: lat,
+                    lon: lon,
+                    title: title,
+                    desc: desc,
+                    userId: userId,
+                    ratingAvg: ratingAvg,
+                    ratingCount: ratingCount
+                )
+                loaded.append(p)
+            }
 
-
-                let annotation = PointAnnotation()
-                annotation.coordinate = CLLocationCoordinate2D(latitude: lat, longitude: lon)
-                annotation.title = title
-                annotation.documentID = docID
-                annotation.ownerID = userId
-                annotation.subtitle = "\(desc)\n⭐ \(String(format: "%.1f", ratingAvg)) (\(ratingCount))"
-                self.mapView.addAnnotation(annotation)
+            DispatchQueue.main.async {
+                self.allPoints = loaded
+                if let loc = self.locationManager.location?.coordinate {
+                    self.updateAnnotationsForCurrentLocation(location: loc)
+                    self.updateRangeCircle(at: loc, radius: self.searchRadiusMeters)
+                } else {
+                    
+                    let annsToRemove = self.mapView.annotations.filter { !($0 is MKUserLocation) }
+                    self.mapView.removeAnnotations(annsToRemove)
+                }
             }
         }
     }
-
-
+  
 
     @objc func handleLongPress(_ gesture: UILongPressGestureRecognizer) {
         if gesture.state != .began { return }
@@ -167,66 +232,52 @@ class LoginAccessViewController: UIViewController, CLLocationManagerDelegate, MK
             }))
             present(alert, animated: true)
     }
-    
-    
     func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
         mapView.deselectAnnotation(view.annotation, animated: false)
         guard let annotation = view.annotation as? PointAnnotation else { return }
         let pointId = annotation.documentID
 
-        // cargar comentarios
-        loadComments(for: pointId) { comments in
-            DispatchQueue.main.async {
-                var message = ""
-                for c in comments {
-                    message += "\(c.userName): \(c.text)\n\n"
-                }
-                if message.isEmpty { message = "No hay comentarios aún." }
+        let alert = UIAlertController(
+            title: annotation.title ?? "Detalles",
+            message: annotation.subtitle ?? "Sin descripción",
+            preferredStyle: .actionSheet
+        )
 
-                let alert = UIAlertController(title: annotation.title ?? "Comentarios",
-                                              message: message,
-                                              preferredStyle: .actionSheet)
+       
+        alert.addAction(UIAlertAction(title: "Indicar ruta 🚗", style: .default, handler: { _ in
+            self.showRoute(to: annotation.coordinate)
+        }))
 
-                // Agregar/editar comentario (usuario actual)
-                alert.addAction(UIAlertAction(title: "Agregar/Editar mi comentario", style: .default, handler: { _ in
-                    self.askForComment(existing: comments.first(where: { $0.userId == Auth.auth().currentUser?.uid }), pointId: pointId)
+        if annotation.ownerID == Auth.auth().currentUser?.uid {
+            alert.addAction(UIAlertAction(title: "Eliminar punto", style: .destructive, handler: { _ in
+                let confirm = UIAlertController(
+                    title: "Confirmar",
+                    message: "¿Seguro que deseas eliminar este punto?",
+                    preferredStyle: .alert
+                )
+                confirm.addAction(UIAlertAction(title: "Cancelar", style: .cancel))
+                confirm.addAction(UIAlertAction(title: "Eliminar", style: .destructive, handler: { _ in
+                    self.deletePoint(documentID: pointId)
+                    self.showMessage(message: "Punto eliminado")
                 }))
-
-                // Si mi comentario existe, permitir eliminar
-                if let myComment = comments.first(where: { $0.userId == Auth.auth().currentUser?.uid }) {
-                    alert.addAction(UIAlertAction(title: "Eliminar mi comentario",
-                                                 style: .destructive,
-                                                 handler: { _ in
-
-                        let confirm = UIAlertController(
-                            title: "Confirmar",
-                            message: "¿Seguro que deseas eliminar tu comentario?",
-                            preferredStyle: .alert
-                        )
-
-                        confirm.addAction(UIAlertAction(title: "Cancelar", style: .cancel))
-                        confirm.addAction(UIAlertAction(title: "Eliminar", style: .destructive, handler: { _ in
-                            self.deleteMyComment(pointId: pointId) { err in
-                                if err == nil {
-                                    self.showMessage(message: "Comentario eliminado")
-                                }
-                            }
-                        }))
-
-                        self.present(confirm, animated: true)
-                    }))
-
-                }
-
-                alert.addAction(UIAlertAction(title: "Cerrar", style: .cancel))
-                alert.addAction(UIAlertAction(title: "Calificar ⭐", style: .default, handler: { _ in
-                    self.showRatingSheet(pointId: pointId)
-                }))
-
-                self.present(alert, animated: true)
-            }
+                self.present(confirm, animated: true)
+            }))
+        } else {
+            
+            alert.addAction(UIAlertAction(title: "Agregar/Editar mi comentario", style: .default, handler: { _ in
+                self.askForComment(existing: nil, pointId: pointId)
+            }))
+            alert.addAction(UIAlertAction(title: "Calificar ⭐", style: .default, handler: { _ in
+                self.showRatingSheet(pointId: pointId)
+            }))
         }
+
+        alert.addAction(UIAlertAction(title: "Cerrar", style: .cancel))
+        self.present(alert, animated: true)
     }
+
+
+
 
     func askForComment(existing: Comment?, pointId: String) {
         let alert = UIAlertController(title: existing == nil ? "Agregar comentario" : "Editar comentario",
@@ -373,10 +424,7 @@ class LoginAccessViewController: UIViewController, CLLocationManagerDelegate, MK
         searchResults.removeAll()
         resultsTable.reloadData()
     }
-    // MARK: - Comentarios: CRUD
 
-    // Cargar comentarios (puedes usar snapshot listener para real-time)
-    // Uso: loadComments(for: annotation.documentID) { comments in ... }
     func loadComments(for pointId: String, completion: @escaping ([Comment]) -> Void) {
         db.collection("points").document(pointId).collection("comments")
           .order(by: "timestamp", descending: false)
@@ -399,7 +447,6 @@ class LoginAccessViewController: UIViewController, CLLocationManagerDelegate, MK
         }
     }
 
-    // Añadir o actualizar comentario (document id = currentUser.uid -> garantiza uno por usuario)
     func addOrUpdateComment(pointId: String, text: String, completion: ((Bool, Error?) -> Void)? = nil) {
         guard let user = Auth.auth().currentUser else {
             completion?(false, NSError(domain: "Auth", code: 0))
@@ -430,8 +477,6 @@ class LoginAccessViewController: UIViewController, CLLocationManagerDelegate, MK
         }
     }
 
-
-    // Eliminar comentario del usuario actual
     func deleteMyComment(pointId: String, completion: ((Error?) -> Void)? = nil) {
         guard let user = Auth.auth().currentUser else {
             completion?(NSError(domain: "Auth", code: 0, userInfo: [NSLocalizedDescriptionKey: "No user"]))
@@ -481,10 +526,10 @@ class LoginAccessViewController: UIViewController, CLLocationManagerDelegate, MK
             var newCount = oldCount
 
             if let oldStars = ratingDoc?.data()?["stars"] as? Int {
-                // 🔁 Usuario ya calificó → reemplaza
+                
                 newAvg = ((oldAvg * Double(oldCount)) - Double(oldStars) + Double(stars)) / Double(oldCount)
             } else {
-                // ➕ Nueva calificación
+               
                 newCount += 1
                 newAvg = ((oldAvg * Double(oldCount)) + Double(stars)) / Double(newCount)
             }
@@ -516,8 +561,115 @@ class LoginAccessViewController: UIViewController, CLLocationManagerDelegate, MK
         alert.addAction(UIAlertAction(title: "OK", style: .default))
         present(alert, animated: true)
     }
+    func showRoute(to destination: CLLocationCoordinate2D) {
+        self.destinationCoordinate = destination
+        
+        guard let userLocation = locationManager.location?.coordinate else { return }
+        
+        let sourcePlacemark = MKPlacemark(coordinate: userLocation)
+        let destPlacemark = MKPlacemark(coordinate: destination)
+        
+        let request = MKDirections.Request()
+        request.source = MKMapItem(placemark: sourcePlacemark)
+        request.destination = MKMapItem(placemark: destPlacemark)
+        request.transportType = .automobile
+        
+        let directions = MKDirections(request: request)
+        directions.calculate { response, error in
+            guard let route = response?.routes.first else { return }
+            
+            self.mapView.removeOverlays(self.mapView.overlays)
+            self.mapView.addOverlay(route.polyline)
+            self.currentRoute = route
+            
+            // Reinicia el índice de pasos
+            self.currentStepIndex = 0
+            
+            self.mapView.setVisibleMapRect(route.polyline.boundingMapRect,
+                                           edgePadding: UIEdgeInsets(top: 50, left: 50, bottom: 50, right: 50),
+                                           animated: true)
+        }
+    }
+
+
+
+    func speak(_ text: String) {
+        let utterance = AVSpeechUtterance(string: text)
+        utterance.voice = AVSpeechSynthesisVoice(language: "es-ES")
+        utterance.rate = 0.45
+        speechSynthesizer.speak(utterance)
+    }
+    func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
+        if let polyline = overlay as? MKPolyline {
+            let renderer = MKPolylineRenderer(polyline: polyline)
+            renderer.strokeColor = .systemBlue
+            renderer.lineWidth = 5
+            return renderer
+        } else if let circle = overlay as? MKCircle {
+            let renderer = MKCircleRenderer(circle: circle)
+            renderer.fillColor = UIColor.systemBlue.withAlphaComponent(0.08)
+            renderer.strokeColor = UIColor.systemBlue.withAlphaComponent(0.4)
+            renderer.lineWidth = 1.5
+            return renderer
+        }
+        return MKOverlayRenderer(overlay: overlay)
+    }
+    func cancelRoute() {
+        mapView.removeOverlays(mapView.overlays)
+        currentRoute = nil
+        destinationCoordinate = nil
+        currentStepIndex = 0
+        if speechSynthesizer.isSpeaking { speechSynthesizer.stopSpeaking(at: .immediate)
+        }
+        mapView.setUserTrackingMode(.follow, animated: true)
+        showMessage(message: "Ruta cancelada")
+    }
+
+
+    func updateAnnotationsForCurrentLocation(location: CLLocationCoordinate2D) {
+        DispatchQueue.main.async {
+           
+            let userLocationAnnotations = self.mapView.annotations.filter { $0 is MKUserLocation }
+            self.mapView.removeAnnotations(self.mapView.annotations.filter { !($0 is MKUserLocation) })
+
+            let userLoc = CLLocation(latitude: location.latitude, longitude: location.longitude)
+
+            for p in self.allPoints {
+                let pointLoc = CLLocation(latitude: p.lat, longitude: p.lon)
+                let dist = userLoc.distance(from: pointLoc)
+                if dist <= self.searchRadiusMeters {
+                    let annotation = PointAnnotation()
+                    annotation.coordinate = CLLocationCoordinate2D(latitude: p.lat, longitude: p.lon)
+                    annotation.title = p.title
+                    annotation.documentID = p.docID
+                    annotation.ownerID = p.userId
+
+                    if p.userId == Auth.auth().currentUser?.uid {
+                        annotation.subtitle = p.desc
+                    } else {
+                        annotation.subtitle = "\(p.desc)\n⭐ \(String(format: "%.1f", p.ratingAvg)) (\(p.ratingCount))"
+                    }
+
+                    self.mapView.addAnnotation(annotation)
+                }
+            }
+        }
+    }
+
+    func updateRangeCircle(at coordinate: CLLocationCoordinate2D, radius: Double) {
+        DispatchQueue.main.async {
+            if let existing = self.rangeCircle {
+                self.mapView.removeOverlay(existing)
+            }
+            let circle = MKCircle(center: coordinate, radius: radius)
+            self.rangeCircle = circle
+            self.mapView.addOverlay(circle)
+        }
+    }
+
 
 }
+
 extension LoginAccessViewController: MKLocalSearchCompleterDelegate {
     func completerDidUpdateResults(_ completer: MKLocalSearchCompleter) {
         self.searchResults = completer.results
@@ -525,5 +677,16 @@ extension LoginAccessViewController: MKLocalSearchCompleterDelegate {
         self.resultsTable.reloadData()
     }
     
-
 }
+
+fileprivate struct PointModel {
+    let docID: String
+    let lat: Double
+    let lon: Double
+    let title: String
+    let desc: String
+    let userId: String
+    let ratingAvg: Double
+    let ratingCount: Int
+}
+
