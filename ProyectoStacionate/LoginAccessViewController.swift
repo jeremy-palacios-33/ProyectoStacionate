@@ -13,7 +13,7 @@ class LoginAccessViewController: UIViewController, CLLocationManagerDelegate, MK
     @IBOutlet weak var barraBusqueda: UISearchBar!
     @IBOutlet weak var centerButtom: UIButton!
     var currentStepIndex: Int = 0
-
+    var voiceTimer: Timer?
     @IBOutlet weak var resultsTable: UITableView!
     
     let completer = MKLocalSearchCompleter()
@@ -32,7 +32,7 @@ class LoginAccessViewController: UIViewController, CLLocationManagerDelegate, MK
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
-       
+        if let uid = Auth.auth().currentUser?.uid { print("UID del usuario autenticado: \(uid)") } else { print("No hay usuario autenticado") }
         locationManager.delegate = self
             locationManager.desiredAccuracy = kCLLocationAccuracyBest
             locationManager.requestWhenInUseAuthorization()
@@ -582,12 +582,31 @@ class LoginAccessViewController: UIViewController, CLLocationManagerDelegate, MK
             self.mapView.addOverlay(route.polyline)
             self.currentRoute = route
             
-            // Reinicia el índice de pasos
+            // Reinicia índice y timer
             self.currentStepIndex = 0
-            
+            self.voiceTimer?.invalidate()
+
+            // Inicia un timer que dispara cada 15 segundos
+            self.voiceTimer = Timer.scheduledTimer(withTimeInterval: 15.0, repeats: true) { _ in
+                self.readNextStep()
+            }
+
             self.mapView.setVisibleMapRect(route.polyline.boundingMapRect,
                                            edgePadding: UIEdgeInsets(top: 50, left: 50, bottom: 50, right: 50),
                                            animated: true)
+        }
+    }
+
+    func readNextStep() {
+        guard let route = currentRoute else { return }
+        let steps = route.steps
+
+        if currentStepIndex < steps.count {
+            let step = steps[currentStepIndex]
+            if !step.instructions.isEmpty {
+                speak(step.instructions)
+            }
+            
         }
     }
 
@@ -621,30 +640,36 @@ class LoginAccessViewController: UIViewController, CLLocationManagerDelegate, MK
         currentStepIndex = 0
         if speechSynthesizer.isSpeaking { speechSynthesizer.stopSpeaking(at: .immediate)
         }
+        voiceTimer?.invalidate()
+        voiceTimer = nil
         mapView.setUserTrackingMode(.follow, animated: true)
         showMessage(message: "Ruta cancelada")
     }
 
-
     func updateAnnotationsForCurrentLocation(location: CLLocationCoordinate2D) {
         DispatchQueue.main.async {
-           
-            let userLocationAnnotations = self.mapView.annotations.filter { $0 is MKUserLocation }
+            // Remueve todas las anotaciones excepto la del usuario
             self.mapView.removeAnnotations(self.mapView.annotations.filter { !($0 is MKUserLocation) })
 
             let userLoc = CLLocation(latitude: location.latitude, longitude: location.longitude)
+            let currentUserID = Auth.auth().currentUser?.uid
+            let adminID = "OLnuGzR0viX4ESlgTY2Eus8Tzdr2"
 
             for p in self.allPoints {
                 let pointLoc = CLLocation(latitude: p.lat, longitude: p.lon)
                 let dist = userLoc.distance(from: pointLoc)
-                if dist <= self.searchRadiusMeters {
+
+                // ✅ Validación: solo mostrar si es del admin o del usuario actual
+                if dist <= self.searchRadiusMeters &&
+                    (p.userId == currentUserID || p.userId == adminID) {
+
                     let annotation = PointAnnotation()
                     annotation.coordinate = CLLocationCoordinate2D(latitude: p.lat, longitude: p.lon)
                     annotation.title = p.title
                     annotation.documentID = p.docID
                     annotation.ownerID = p.userId
 
-                    if p.userId == Auth.auth().currentUser?.uid {
+                    if p.userId == currentUserID {
                         annotation.subtitle = p.desc
                     } else {
                         annotation.subtitle = "\(p.desc)\n⭐ \(String(format: "%.1f", p.ratingAvg)) (\(p.ratingCount))"
@@ -655,6 +680,7 @@ class LoginAccessViewController: UIViewController, CLLocationManagerDelegate, MK
             }
         }
     }
+
 
     func updateRangeCircle(at coordinate: CLLocationCoordinate2D, radius: Double) {
         DispatchQueue.main.async {
