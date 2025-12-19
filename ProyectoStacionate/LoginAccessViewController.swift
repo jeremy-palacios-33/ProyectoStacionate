@@ -53,9 +53,7 @@ class LoginAccessViewController: UIViewController, CLLocationManagerDelegate, MK
         
         setupBottomSheet()
         setupMenuButton()
-        checkSession()
-        loadUserData()
-        
+ 
         if let uid = Auth.auth().currentUser?.uid { print("UID del usuario autenticado: \(uid)") } else { print("No hay usuario autenticado") }
         locationManager.delegate = self
             locationManager.desiredAccuracy = kCLLocationAccuracyBest
@@ -96,16 +94,39 @@ class LoginAccessViewController: UIViewController, CLLocationManagerDelegate, MK
         }
 
         // MARK: - Cargar datos
-        func loadUserData() {
-            guard let uid = Auth.auth().currentUser?.uid else { return }
+    func loadUserData() {
+        guard let user = Auth.auth().currentUser else { return }
 
-            db.collection("users").document(uid).getDocument { snapshot, _ in
-                let name = snapshot?.data()?["name"] as? String ?? "Usuario"
+        let uid = user.uid
+        let email = user.email ?? ""
+
+        let userRef = db.collection("users").document(uid)
+
+        userRef.getDocument { snapshot, error in
+            if let data = snapshot?.data(),
+               let name = data["name"] as? String {
+
                 DispatchQueue.main.async {
                     self.userNameLabel.text = "Hola, \(name)"
                 }
+
+            } else {
+                // 🔥 NO existe en Firestore → lo creamos
+                let defaultName = email.components(separatedBy: "@").first ?? "Usuario"
+
+                userRef.setData([
+                    "name": defaultName,
+                    "email": email,
+                    "createdAt": FieldValue.serverTimestamp()
+                ])
+
+                DispatchQueue.main.async {
+                    self.userNameLabel.text = "Hola, \(defaultName)"
+                }
             }
         }
+    }
+
     
     func goToLogin() {
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
@@ -119,19 +140,25 @@ class LoginAccessViewController: UIViewController, CLLocationManagerDelegate, MK
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
-
-        // Oculto completamente abajo al iniciar
-        bottomSheetBottomConstraint.constant = -bottomSheetHeight
-        view.layoutIfNeeded()
+        checkSession()
+        loadUserData()
+        
     }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+
+        if !isBottomSheetVisible {
+            bottomSheetBottomConstraint.constant = -bottomSheet.frame.height
+        }
+    }
+
     
     private func setupBottomSheet() {
         bottomSheet.layer.cornerRadius = 20
         bottomSheet.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
         bottomSheet.clipsToBounds = true
 
-        // Inicialmente oculto
-        bottomSheetBottomConstraint.constant = bottomSheet.frame.height
 
         // Configurar botones
         profileButton.setTitle("Ver Perfil", for: .normal)
@@ -144,13 +171,8 @@ class LoginAccessViewController: UIViewController, CLLocationManagerDelegate, MK
             btn.backgroundColor = UIColor.systemBlue
             btn.tintColor = .white
         }
-
-        // Mostrar nombre de usuario
-        if let user = Auth.auth().currentUser {
-            userNameLabel.text = "Hola, \(user.displayName ?? "Usuario")"
-        } else {
-            userNameLabel.text = "Hola, Usuario"
-        }
+        
+        userNameLabel.text = "Hola, Usuario"
     }
 
     @IBAction func profileButtonTapped(_ sender: UIButton) {
