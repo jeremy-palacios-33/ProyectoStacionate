@@ -16,6 +16,18 @@ class LoginAccessViewController: UIViewController, CLLocationManagerDelegate, MK
     var voiceTimer: Timer?
     @IBOutlet weak var resultsTable: UITableView!
     
+    @IBOutlet weak var bottomSheet: UIView!
+    
+    @IBOutlet weak var bottomSheetBottomConstraint: NSLayoutConstraint!
+    
+    @IBOutlet weak var menuButton: UIButton!
+    
+    @IBOutlet weak var userNameLabel: UILabel!
+    @IBOutlet weak var profileButton: UIButton!
+    @IBOutlet weak var scheduleButton: UIButton!
+    @IBOutlet weak var settingsButton: UIButton!
+    @IBOutlet weak var logoutButton: UIButton!
+    
     let completer = MKLocalSearchCompleter()
     var searchResults: [MKLocalSearchCompletion] = []
     let locationManager = CLLocationManager()
@@ -28,10 +40,22 @@ class LoginAccessViewController: UIViewController, CLLocationManagerDelegate, MK
     private var rangeCircle: MKCircle?
     private var lastRefilterLocation: CLLocation?
     private let minDistanceToRefilter: CLLocationDistance = 10
+    
+    // Bottom Sheet
+    private var isBottomSheetVisible = false
+    private var bottomSheetHeight: CGFloat {
+        bottomSheet.frame.height
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
+        
+        setupBottomSheet()
+        setupMenuButton()
+        checkSession()
+        loadUserData()
+        
         if let uid = Auth.auth().currentUser?.uid { print("UID del usuario autenticado: \(uid)") } else { print("No hay usuario autenticado") }
         locationManager.delegate = self
             locationManager.desiredAccuracy = kCLLocationAccuracyBest
@@ -59,6 +83,147 @@ class LoginAccessViewController: UIViewController, CLLocationManagerDelegate, MK
         listenPoints()
         mapView.setUserTrackingMode(.followWithHeading, animated: true)
     }
+    
+    // MARK: - Verificar sesión
+        func checkSession() {
+            guard let user = Auth.auth().currentUser else {
+                print("🚫 Acceso bloqueado: no autenticado")
+                goToLogin()
+                return
+            }
+
+            print("🔐 Usuario activo:", user.email ?? "")
+        }
+
+        // MARK: - Cargar datos
+        func loadUserData() {
+            guard let uid = Auth.auth().currentUser?.uid else { return }
+
+            db.collection("users").document(uid).getDocument { snapshot, _ in
+                let name = snapshot?.data()?["name"] as? String ?? "Usuario"
+                DispatchQueue.main.async {
+                    self.userNameLabel.text = "Hola, \(name)"
+                }
+            }
+        }
+    
+    func goToLogin() {
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        let loginVC = storyboard.instantiateViewController(
+            withIdentifier: "LoginViewController"
+        )
+        loginVC.modalPresentationStyle = .fullScreen
+        present(loginVC, animated: true)
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        
+
+        // Oculto completamente abajo al iniciar
+        bottomSheetBottomConstraint.constant = -bottomSheetHeight
+        view.layoutIfNeeded()
+    }
+    
+    private func setupBottomSheet() {
+        bottomSheet.layer.cornerRadius = 20
+        bottomSheet.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
+        bottomSheet.clipsToBounds = true
+
+        // Inicialmente oculto
+        bottomSheetBottomConstraint.constant = bottomSheet.frame.height
+
+        // Configurar botones
+        profileButton.setTitle("Ver Perfil", for: .normal)
+        scheduleButton.setTitle("Programar Viaje", for: .normal)
+        settingsButton.setTitle("Ajustes", for: .normal)
+        logoutButton.setTitle("Cerrar sesión", for: .normal)
+
+        [profileButton, scheduleButton, settingsButton, logoutButton].forEach { btn in
+            btn.layer.cornerRadius = 8
+            btn.backgroundColor = UIColor.systemBlue
+            btn.tintColor = .white
+        }
+
+        // Mostrar nombre de usuario
+        if let user = Auth.auth().currentUser {
+            userNameLabel.text = "Hola, \(user.displayName ?? "Usuario")"
+        } else {
+            userNameLabel.text = "Hola, Usuario"
+        }
+    }
+
+    @IBAction func profileButtonTapped(_ sender: UIButton) {
+        print("Ver Perfil")
+        // Aquí puedes abrir la pantalla de perfil
+    }
+
+    @IBAction func scheduleButtonTapped(_ sender: UIButton) {
+        print("Programar Viaje")
+        // Abrir pantalla de programación de viaje
+    }
+
+    @IBAction func settingsButtonTapped(_ sender: UIButton) {
+        print("Ajustes")
+        // Abrir pantalla de ajustes
+    }
+
+    @IBAction func logoutButtonTapped(_ sender: UIButton) {
+        do {
+            try Auth.auth().signOut()
+            print("Sesión cerrada")
+            goToLogin()
+        } catch {
+            print("Error al cerrar sesión: \(error)")
+        }
+    }
+
+    
+    private func setupMenuButton() {
+        menuButton.layer.cornerRadius = 26
+        menuButton.backgroundColor = .black
+        menuButton.tintColor = .white
+
+        menuButton.layer.shadowColor = UIColor.black.cgColor
+        menuButton.layer.shadowOpacity = 0.3
+        menuButton.layer.shadowOffset = CGSize(width: 0, height: 4)
+        menuButton.layer.shadowRadius = 6
+    }
+
+    
+    // MARK: - Bottom Sheet Control
+        private func showBottomSheet(animated: Bool = true) {
+            isBottomSheetVisible = true
+            bottomSheetBottomConstraint.constant = 0
+            animateBottomSheet(animated)
+        }
+
+        private func hideBottomSheet(animated: Bool = true) {
+            isBottomSheetVisible = false
+            bottomSheetBottomConstraint.constant = -bottomSheetHeight
+            animateBottomSheet(animated)
+        }
+
+        private func toggleBottomSheet() {
+            isBottomSheetVisible ? hideBottomSheet() : showBottomSheet()
+        }
+
+        private func animateBottomSheet(_ animated: Bool) {
+            if animated {
+                UIView.animate(withDuration: 0.3, delay: 0, options: .curveEaseInOut) {
+                    self.view.layoutIfNeeded()
+                }
+            } else {
+                view.layoutIfNeeded()
+            }
+        }
+
+        // MARK: - Actions
+        @IBAction func menuButtonTapped(_ sender: UIButton) {
+            toggleBottomSheet()
+        }
+    
+    
     func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
         if annotation is MKUserLocation { return nil }
 
