@@ -28,6 +28,9 @@ class LoginAccessViewController: UIViewController, CLLocationManagerDelegate, MK
     @IBOutlet weak var settingsButton: UIButton!
     @IBOutlet weak var logoutButton: UIButton!
     
+    @IBOutlet weak var cancelRouteButton: UIButton!
+    
+    
     let completer = MKLocalSearchCompleter()
     var searchResults: [MKLocalSearchCompletion] = []
     let locationManager = CLLocationManager()
@@ -40,8 +43,10 @@ class LoginAccessViewController: UIViewController, CLLocationManagerDelegate, MK
     private var rangeCircle: MKCircle?
     private var lastRefilterLocation: CLLocation?
     private let minDistanceToRefilter: CLLocationDistance = 10
+    private var customCenterCoordinate: CLLocationCoordinate2D? = nil
+
+   
     
-    // Bottom Sheet
     private var isBottomSheetVisible = false
     private var bottomSheetHeight: CGFloat {
         bottomSheet.frame.height
@@ -77,7 +82,7 @@ class LoginAccessViewController: UIViewController, CLLocationManagerDelegate, MK
             latitudinalMeters: 50000,
             longitudinalMeters: 50000
         )
-        // Llamamos a la versión modificada que filtra por rango
+        cancelRouteButton.isHidden = true
         listenPoints()
         mapView.setUserTrackingMode(.followWithHeading, animated: true)
     }
@@ -273,10 +278,7 @@ class LoginAccessViewController: UIViewController, CLLocationManagerDelegate, MK
     }
 
     func locationManager(_ manager: CLLocationManager, didUpdateHeading newHeading: CLHeading) {
-        // Aquí obtienes el ángulo en grados respecto al norte
-        let heading = newHeading.trueHeading  // o .magneticHeading
-        
-        // Actualiza la cámara del mapa con ese heading
+        let heading = newHeading.trueHeading
         let camera = MKMapCamera(
             lookingAtCenter: mapView.centerCoordinate,
             fromDistance: 100,
@@ -296,10 +298,10 @@ class LoginAccessViewController: UIViewController, CLLocationManagerDelegate, MK
         completer.queryFragment = searchText
     }
 
-
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-    
         guard let userLocation = locations.last else { return }
+
+        let centerCoord = customCenterCoordinate ?? userLocation.coordinate
 
         if let destination = destinationCoordinate {
             let distance = userLocation.distance(from: CLLocation(latitude: destination.latitude, longitude: destination.longitude))
@@ -308,27 +310,32 @@ class LoginAccessViewController: UIViewController, CLLocationManagerDelegate, MK
             }
         }
 
-        
         if let last = lastRefilterLocation {
             let moved = userLocation.distance(from: last)
             if moved > minDistanceToRefilter {
                 lastRefilterLocation = userLocation
-                updateRangeCircle(at: userLocation.coordinate, radius: searchRadiusMeters)
-                updateAnnotationsForCurrentLocation(location: userLocation.coordinate)
+                updateRangeCircle(at: centerCoord, radius: searchRadiusMeters)
+                updateAnnotationsForCurrentLocation(location: centerCoord)
             }
         } else {
-            
             lastRefilterLocation = userLocation
-            updateRangeCircle(at: userLocation.coordinate, radius: searchRadiusMeters)
-            updateAnnotationsForCurrentLocation(location: userLocation.coordinate)
+            updateRangeCircle(at: centerCoord, radius: searchRadiusMeters)
+            updateAnnotationsForCurrentLocation(location: centerCoord)
         }
     }
 
 
+
     @IBAction func centerMapButtonTapped(_ sender: UIButton) {
+        customCenterCoordinate = nil
         mapView.setUserTrackingMode(.follow, animated: true)
+
+        if let loc = locationManager.location?.coordinate {
+            updateRangeCircle(at: loc, radius: searchRadiusMeters)
+            updateAnnotationsForCurrentLocation(location: loc)
+        }
     }
-    
+
     @IBAction func tiltMapButtonTapped(_ sender: UIButton) {
         let camera = MKMapCamera(
                 lookingAtCenter: mapView.centerCoordinate,
@@ -424,43 +431,114 @@ class LoginAccessViewController: UIViewController, CLLocationManagerDelegate, MK
         guard let annotation = view.annotation as? PointAnnotation else { return }
         let pointId = annotation.documentID
 
-        let alert = UIAlertController(
-            title: annotation.title ?? "Detalles",
-            message: annotation.subtitle ?? "Sin descripción",
-            preferredStyle: .actionSheet
-        )
+        let commentsRef = db.collection("points").document(pointId).collection("comments")
+        let currentUID = Auth.auth().currentUser?.uid
 
-       
-        alert.addAction(UIAlertAction(title: "Indicar ruta 🚗", style: .default, handler: { _ in
-            self.showRoute(to: annotation.coordinate)
-        }))
+        // Usamos DispatchGroup para esperar a las dos consultas
+        let group = DispatchGroup()
+        var commentsCount = 0
+        var myCommentSnap: DocumentSnapshot?
 
-        if annotation.ownerID == Auth.auth().currentUser?.uid {
-            alert.addAction(UIAlertAction(title: "Eliminar punto", style: .destructive, handler: { _ in
-                let confirm = UIAlertController(
-                    title: "Confirmar",
-                    message: "¿Seguro que deseas eliminar este punto?",
-                    preferredStyle: .alert
-                )
-                confirm.addAction(UIAlertAction(title: "Cancelar", style: .cancel))
-                confirm.addAction(UIAlertAction(title: "Eliminar", style: .destructive, handler: { _ in
-                    self.deletePoint(documentID: pointId)
-                    self.showMessage(message: "Punto eliminado")
-                }))
-                self.present(confirm, animated: true)
-            }))
-        } else {
-            
-            alert.addAction(UIAlertAction(title: "Agregar/Editar mi comentario", style: .default, handler: { _ in
-                self.askForComment(existing: nil, pointId: pointId)
-            }))
-            alert.addAction(UIAlertAction(title: "Calificar ⭐", style: .default, handler: { _ in
-                self.showRatingSheet(pointId: pointId)
-            }))
+        group.enter()
+        commentsRef.getDocuments { snapshot, _ in
+            commentsCount = snapshot?.documents.count ?? 0
+            group.leave()
         }
 
-        alert.addAction(UIAlertAction(title: "Cerrar", style: .cancel))
-        self.present(alert, animated: true)
+        if let uid = currentUID {
+            group.enter()
+            commentsRef.document(uid).getDocument { snap, _ in
+                myCommentSnap = snap
+                group.leave()
+            }
+        }
+
+        group.notify(queue: .main) {
+            let alert = UIAlertController(
+                title: annotation.title ?? "Detalles",
+                message: annotation.subtitle ?? "Sin descripción",
+                preferredStyle: .actionSheet
+            )
+
+            // Si hay comentarios, permitimos verlos todos
+            if commentsCount > 0 {
+                alert.addAction(UIAlertAction(title: "Ver todos los comentarios 💬", style: .default) { _ in
+                    self.openCommentsView(pointId: pointId,
+                                          title: annotation.title ?? "",
+                                          description: annotation.subtitle ?? "")
+                })
+            }
+
+            // Si el usuario ya comentó, habilitamos "Eliminar mi comentario" y "Editar mi comentario"
+            if let snap = myCommentSnap, snap.exists {
+                let myText = snap.data()?["text"] as? String ?? ""
+
+                alert.addAction(UIAlertAction(title: "Editar mi comentario", style: .default) { _ in
+                    // Construimos un Comment temporal para pasar a askForComment
+                    let existing = Comment(
+                        id: snap.documentID,
+                        userId: snap.data()?["userId"] as? String ?? "",
+                        userName: snap.data()?["userName"] as? String ?? "Anon",
+                        text: myText,
+                        timestamp: snap.data()?["timestamp"] as? Timestamp
+                    )
+                    self.askForComment(existing: existing, pointId: pointId)
+                })
+
+                alert.addAction(UIAlertAction(title: "Eliminar mi comentario", style: .destructive) { _ in
+                    let confirm = UIAlertController(
+                        title: "Confirmar eliminación",
+                        message: "¿Seguro que quieres eliminar tu comentario?",
+                        preferredStyle: .alert
+                    )
+                    confirm.addAction(UIAlertAction(title: "Cancelar", style: .cancel))
+                    confirm.addAction(UIAlertAction(title: "Eliminar", style: .destructive) { _ in
+                        self.deleteMyComment(pointId: pointId) { err in
+                            if let err = err {
+                                print("Error eliminando comentario: \(err)")
+                                self.showMessage(title: "Error", message: "No se pudo eliminar el comentario")
+                            } else {
+                                self.showMessage(message: "Comentario eliminado")
+                            }
+                        }
+                    })
+                    self.present(confirm, animated: true)
+                })
+            } else {
+                // Si no hay comentario del usuario, mostrar opción para agregar
+                alert.addAction(UIAlertAction(title: "Agregar comentario", style: .default) { _ in
+                    self.askForComment(existing: nil, pointId: pointId)
+                })
+            }
+
+            // Otras acciones (ruta, calificar, eliminar punto si es dueño)
+            alert.addAction(UIAlertAction(title: "Indicar ruta 🚗", style: .default, handler: { _ in
+                self.showRoute(to: annotation.coordinate)
+            }))
+
+            if annotation.ownerID == Auth.auth().currentUser?.uid {
+                alert.addAction(UIAlertAction(title: "Eliminar punto", style: .destructive, handler: { _ in
+                    let confirm = UIAlertController(
+                        title: "Confirmar",
+                        message: "¿Seguro que deseas eliminar este punto?",
+                        preferredStyle: .alert
+                    )
+                    confirm.addAction(UIAlertAction(title: "Cancelar", style: .cancel))
+                    confirm.addAction(UIAlertAction(title: "Eliminar", style: .destructive, handler: { _ in
+                        self.deletePoint(documentID: pointId)
+                        self.showMessage(message: "Punto eliminado")
+                    }))
+                    self.present(confirm, animated: true)
+                }))
+            } else {
+                alert.addAction(UIAlertAction(title: "Calificar ⭐", style: .default, handler: { _ in
+                    self.showRatingSheet(pointId: pointId)
+                }))
+            }
+
+            alert.addAction(UIAlertAction(title: "Cerrar", style: .cancel))
+            self.present(alert, animated: true)
+        }
     }
 
 
@@ -531,6 +609,7 @@ class LoginAccessViewController: UIViewController, CLLocationManagerDelegate, MK
     }
     
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        
         searchBar.resignFirstResponder()
 
         guard let query = searchBar.text, !query.isEmpty else { return }
@@ -551,6 +630,7 @@ class LoginAccessViewController: UIViewController, CLLocationManagerDelegate, MK
             }
 
             let coordinate = item.placemark.coordinate
+            
 
             let region = MKCoordinateRegion(
                 center: coordinate,
@@ -563,6 +643,10 @@ class LoginAccessViewController: UIViewController, CLLocationManagerDelegate, MK
             annotation.coordinate = coordinate
             annotation.title = item.name ?? "Resultado"
             self.mapView.addAnnotation(annotation)
+            
+            self.customCenterCoordinate = coordinate
+            self.updateRangeCircle(at: coordinate, radius: self.searchRadiusMeters)
+            self.updateAnnotationsForCurrentLocation(location: coordinate)
         }
     }
     
@@ -589,7 +673,7 @@ class LoginAccessViewController: UIViewController, CLLocationManagerDelegate, MK
         search.start { response, error in
             if let item = response?.mapItems.first {
                 let coord = item.placemark.coordinate
-
+                
               
                 let region = MKCoordinateRegion(center: coord, latitudinalMeters: 800, longitudinalMeters: 800)
                 self.mapView.setRegion(region, animated: true)
@@ -603,6 +687,10 @@ class LoginAccessViewController: UIViewController, CLLocationManagerDelegate, MK
                 ann.coordinate = coord
                 ann.title = item.name
                 self.mapView.addAnnotation(ann)
+                self.customCenterCoordinate = coord
+                self.updateRangeCircle(at: coord, radius: self.searchRadiusMeters)
+                self.updateAnnotationsForCurrentLocation(location: coord)
+                
             }
         }
     }
@@ -768,7 +856,7 @@ class LoginAccessViewController: UIViewController, CLLocationManagerDelegate, MK
             self.mapView.removeOverlays(self.mapView.overlays)
             self.mapView.addOverlay(route.polyline)
             self.currentRoute = route
-            
+            self.cancelRouteButton.isHidden = false
             // Reinicia índice y timer
             self.currentStepIndex = 0
             self.voiceTimer?.invalidate()
@@ -782,6 +870,8 @@ class LoginAccessViewController: UIViewController, CLLocationManagerDelegate, MK
                                            edgePadding: UIEdgeInsets(top: 50, left: 50, bottom: 50, right: 50),
                                            animated: true)
         }
+        
+
     }
 
     func readNextStep() {
@@ -830,6 +920,7 @@ class LoginAccessViewController: UIViewController, CLLocationManagerDelegate, MK
         voiceTimer?.invalidate()
         voiceTimer = nil
         mapView.setUserTrackingMode(.follow, animated: true)
+        cancelRouteButton.isHidden = true
         showMessage(message: "Ruta cancelada")
     }
 
@@ -880,7 +971,27 @@ class LoginAccessViewController: UIViewController, CLLocationManagerDelegate, MK
         }
     }
 
+    func openCommentsView(pointId: String, title: String, description: String) {
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        let vc = storyboard.instantiateViewController(
+            withIdentifier: "CommentsViewController"
+        ) as! CommentsViewController
 
+        vc.pointId = pointId
+        vc.pointTitle = title
+        vc.pointDescription = description
+
+        vc.modalPresentationStyle = .pageSheet
+        present(vc, animated: true)
+    }
+
+    
+    @IBAction func cancelRouteTapped(_ sender: UIButton) {
+        cancelRoute()
+    }
+    
+    
+    
 }
 
 extension LoginAccessViewController: MKLocalSearchCompleterDelegate {
