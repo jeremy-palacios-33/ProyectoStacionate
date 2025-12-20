@@ -176,9 +176,17 @@ class LoginAccessViewController: UIViewController, CLLocationManagerDelegate, MK
     }
 
     @IBAction func profileButtonTapped(_ sender: UIButton) {
-        print("Ver Perfil")
-        // Aquí puedes abrir la pantalla de perfil
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        let profileVC = storyboard.instantiateViewController(
+            withIdentifier: "ProfileViewController"
+        ) as! ProfileViewController
+
+        profileVC.modalPresentationStyle = .fullScreen
+        present(profileVC, animated: true)
     }
+
+
+
 
     @IBAction func scheduleButtonTapped(_ sender: UIButton) {
         print("Programar Viaje")
