@@ -9,21 +9,18 @@ import UIKit
 
 class EditProfileViewController: UIViewController {
 
+    @IBOutlet weak var userImageView: UIImageView!
+
+    var profileImage: UIImage?   // 👈 imagen recibida
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        // Do any additional setup after loading the view.
+        if let image = profileImage {
+            userImageView.image = image
+        } else {
+            userImageView.image = UIImage(systemName: "person.crop.circle.fill")
+        }
     }
-    
-
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
-    }
-    */
-
 }
+

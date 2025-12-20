@@ -30,6 +30,8 @@ class ProfileViewController: UIViewController {
         checkSession()
         loadUserData()
     }
+    
+    
 
     // MARK: - Setup UI
     private func setupUI() {
@@ -107,9 +109,16 @@ class ProfileViewController: UIViewController {
     }
 
     @IBAction func updateProfileButtonTapped(_ sender: UIButton) {
-        print("✏️ Editar perfil")
-        // Aquí luego puedes abrir EditProfileViewController
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        let vc = storyboard.instantiateViewController(
+            withIdentifier: "EditProfileViewController"
+        ) as! EditProfileViewController
+
+        vc.profileImage = userImageView.image
+        vc.modalPresentationStyle = .formSheet
+        present(vc, animated: true)
     }
+
 
     @IBAction func updatePassTapped(_ sender: UIButton) {
         print("🔐 Cambiar contraseña")
