@@ -29,9 +29,13 @@ class ProfileViewController: UIViewController {
         setupUI()
         checkSession()
         loadUserData()
+        
     }
     
-    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        loadUserData()
+    }
 
     // MARK: - Setup UI
     private func setupUI() {
@@ -62,22 +66,26 @@ class ProfileViewController: UIViewController {
         // Email (Auth)
         emailLabel.text = user.email ?? "-"
 
-        // Firestore data
         db.collection("users").document(user.uid).getDocument { snapshot, error in
             guard let data = snapshot?.data(), error == nil else {
-                print("⚠️ No se encontraron datos en Firestore")
-                self.userNameLabel.text = "Usuario"
-                self.phoneLabel.text = "-"
-                self.registeredLabel.text = "-"
+                DispatchQueue.main.async {
+                    self.userNameLabel.text = "Usuario"
+                    self.phoneLabel.text = "-"
+                    self.registeredLabel.text = "-"
+                }
                 return
             }
 
-            let name = data["name"] as? String ?? "Usuario"
+            let name = data["name"] as? String ?? ""
+            let lastName = data["lastName"] as? String ?? ""
             let phone = data["phone"] as? String ?? "-"
             let createdAt = data["createdAt"] as? Timestamp
 
+            let fullName = "\(name) \(lastName)"
+                .trimmingCharacters(in: .whitespaces)
+
             DispatchQueue.main.async {
-                self.userNameLabel.text = name
+                self.userNameLabel.text = fullName.isEmpty ? "Usuario" : fullName
                 self.phoneLabel.text = phone
 
                 if let createdAt = createdAt {
@@ -105,8 +113,16 @@ class ProfileViewController: UIViewController {
 
     // MARK: - Actions
     @IBAction func backProfileButtonTapped(_ sender: UIButton) {
-        navigationController?.popViewController(animated: true)
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        let loginAccessVC = storyboard.instantiateViewController(
+            withIdentifier: "LoginAccessViewController"
+        )
+
+        loginAccessVC.modalPresentationStyle = .fullScreen
+        loginAccessVC.modalTransitionStyle = .crossDissolve
+        present(loginAccessVC, animated: true)
     }
+
 
     @IBAction func updateProfileButtonTapped(_ sender: UIButton) {
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
@@ -121,16 +137,14 @@ class ProfileViewController: UIViewController {
 
 
     @IBAction func updatePassTapped(_ sender: UIButton) {
-        print("🔐 Cambiar contraseña")
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        let vc = storyboard.instantiateViewController(
+            withIdentifier: "ChangePasswordViewController"
+        )
 
-        guard let email = Auth.auth().currentUser?.email else { return }
-
-        Auth.auth().sendPasswordReset(withEmail: email) { error in
-            if let error = error {
-                print("❌ Error:", error.localizedDescription)
-            } else {
-                print("✅ Correo de recuperación enviado")
-            }
-        }
+        vc.modalPresentationStyle = .fullScreen   // o .pageSheet si deseas
+        vc.modalTransitionStyle = .coverVertical
+        present(vc, animated: true)
     }
+
 }

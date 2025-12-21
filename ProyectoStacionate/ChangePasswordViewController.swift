@@ -2,28 +2,95 @@
 //  ChangePasswordViewController.swift
 //  ProyectoStacionate
 //
-//  Created by DAMII on 20/12/25.
-//
 
 import UIKit
+import FirebaseAuth
 
 class ChangePasswordViewController: UIViewController {
 
+    // MARK: - IBOutlets
+    @IBOutlet weak var emailTextField: UITextField!
+    @IBOutlet weak var newPasswordTextField: UITextField!
+    @IBOutlet weak var confirmPasswordTextField: UITextField!
+
+    @IBOutlet weak var saveButton: UIButton!
+    @IBOutlet weak var backButton: UIButton!
+
+    // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        // Do any additional setup after loading the view.
+        setupUI()
+        loadUserEmail()
     }
-    
 
-    /*
-    // MARK: - Navigation
+    // MARK: - Setup UI
+    private func setupUI() {
+        // Email (solo lectura)
+        emailTextField.isUserInteractionEnabled = false
+        emailTextField.textColor = .gray
 
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
+        // Passwords
+        newPasswordTextField.isSecureTextEntry = true
+        confirmPasswordTextField.isSecureTextEntry = true
+
+        // Botones
+        [saveButton, backButton].forEach {
+            $0?.layer.cornerRadius = 10
+        }
     }
-    */
 
+    // MARK: - Load Email
+    private func loadUserEmail() {
+        emailTextField.text = Auth.auth().currentUser?.email
+    }
+
+    // MARK: - Actions
+    @IBAction func saveTapped(_ sender: UIButton) {
+        guard let newPassword = newPasswordTextField.text,
+              let confirmPassword = confirmPasswordTextField.text,
+              !newPassword.isEmpty,
+              !confirmPassword.isEmpty else {
+            showAlert("Campos incompletos", "Completa todos los campos")
+            return
+        }
+
+        guard newPassword == confirmPassword else {
+            showAlert("Error", "Las contraseñas no coinciden")
+            return
+        }
+
+        guard newPassword.count >= 6 else {
+            showAlert("Contraseña débil", "Debe tener al menos 6 caracteres")
+            return
+        }
+
+        Auth.auth().currentUser?.updatePassword(to: newPassword) { error in
+            if let error = error {
+                self.showAlert("Error", error.localizedDescription)
+            } else {
+                self.showAlert("Éxito", "Contraseña actualizada correctamente") {
+                    self.dismiss(animated: true)
+                }
+            }
+        }
+    }
+
+    @IBAction func backTapped(_ sender: UIButton) {
+        dismiss(animated: true)
+    }
+
+    // MARK: - Alert Helper
+    private func showAlert(_ title: String,
+                           _ message: String,
+                           completion: (() -> Void)? = nil) {
+        let alert = UIAlertController(
+            title: title,
+            message: message,
+            preferredStyle: .alert
+        )
+        alert.addAction(UIAlertAction(title: "OK", style: .default) { _ in
+            completion?()
+        })
+        present(alert, animated: true)
+    }
 }

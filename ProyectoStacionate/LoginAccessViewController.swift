@@ -167,7 +167,7 @@ class LoginAccessViewController: UIViewController, CLLocationManagerDelegate, MK
 
         // Configurar botones
         profileButton.setTitle("Ver Perfil", for: .normal)
-        scheduleButton.setTitle("Programar Viaje", for: .normal)
+        scheduleButton.setTitle("Sobre Nosotros", for: .normal)
         settingsButton.setTitle("Ajustes", for: .normal)
         logoutButton.setTitle("Cerrar sesión", for: .normal)
 
