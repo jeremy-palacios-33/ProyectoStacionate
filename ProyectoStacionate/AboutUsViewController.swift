@@ -1,10 +1,3 @@
-//
-//  AboutUsViewController.swift
-//  ProyectoStacionate
-//
-//  Created by DAMII on 21/12/25.
-//
-
 import UIKit
 
 class AboutUsViewController: UIViewController {

@@ -113,14 +113,7 @@ class ProfileViewController: UIViewController {
 
     // MARK: - Actions
     @IBAction func backProfileButtonTapped(_ sender: UIButton) {
-        let storyboard = UIStoryboard(name: "Main", bundle: nil)
-        let loginAccessVC = storyboard.instantiateViewController(
-            withIdentifier: "LoginAccessViewController"
-        )
-
-        loginAccessVC.modalPresentationStyle = .fullScreen
-        loginAccessVC.modalTransitionStyle = .crossDissolve
-        present(loginAccessVC, animated: true)
+        dismiss(animated: true)
     }
 
 

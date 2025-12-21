@@ -99,16 +99,38 @@ class EditProfileViewController: UIViewController {
 
     // MARK: - Actions
     @IBAction func saveTapped(_ sender: UIButton) {
-        guard let name = nameTextField.text, !name.isEmpty,
+        guard let fullName = nameTextField.text, !fullName.isEmpty,
               let phone = phoneTextField.text, !phone.isEmpty else {
             showAlert("Error", "Completa todos los campos")
             return
         }
 
+        // Validar teléfono: solo números y 9 dígitos
+        let phoneRegex = "^[0-9]{9}$"
+        let phoneTest = NSPredicate(format: "SELF MATCHES %@", phoneRegex)
+        if !phoneTest.evaluate(with: phone) {
+            showAlert("Error", "Ingresa un número de teléfono válido de 9 dígitos")
+            return
+        }
+
+        // Validar nombre: solo letras y espacios
+        let nameRegex = "^[A-Za-zÁÉÍÓÚáéíóúÑñ ]+$"
+        let nameTest = NSPredicate(format: "SELF MATCHES %@", nameRegex)
+        if !nameTest.evaluate(with: fullName) {
+            showAlert("Error", "El nombre solo puede contener letras y espacios")
+            return
+        }
+
         guard let user = Auth.auth().currentUser else { return }
 
+        // Separar el nombre completo en nombre y apellido
+        let nameParts = fullName.split(separator: " ")
+        let firstName = nameParts.first.map(String.init) ?? ""
+        let lastName = nameParts.dropFirst().joined(separator: " ")
+
         let data: [String: Any] = [
-            "name": name,
+            "name": firstName,
+            "lastName": lastName,
             "phone": phone
         ]
 
@@ -122,6 +144,8 @@ class EditProfileViewController: UIViewController {
             }
         }
     }
+
+
 
     @IBAction func cancelTapped(_ sender: UIButton) {
         dismiss(animated: true)

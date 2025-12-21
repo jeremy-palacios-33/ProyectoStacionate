@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="23727" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="rnF-Ht-mtm">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="23727" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="dGP-OD-z6r">
     <device id="retina6_12" orientation="portrait" appearance="light"/>
     <dependencies>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23721"/>
@@ -60,7 +60,7 @@
                                 </constraints>
                             </imageView>
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillEqually" spacing="12" translatesAutoresizingMaskIntoConstraints="NO" id="Pbb-nT-X9q">
-                                <rect key="frame" x="20" y="566" width="353" height="82"/>
+                                <rect key="frame" x="20" y="552" width="353" height="82"/>
                                 <subviews>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="qbj-Gi-9Qo">
                                         <rect key="frame" x="0.0" y="0.0" width="353" height="35"/>
@@ -115,6 +115,7 @@
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="Pbb-nT-X9q" secondAttribute="trailing" constant="20" id="9xv-82-zJr"/>
+                            <constraint firstItem="Pbb-nT-X9q" firstAttribute="top" secondItem="Cgl-f7-VGU" secondAttribute="bottom" constant="157" id="PFn-DI-tbh"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="Cgl-f7-VGU" secondAttribute="trailing" constant="20" id="R1l-JK-IlB"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="IQX-70-gES" secondAttribute="trailing" constant="20" id="X3P-XL-3Xu"/>
                             <constraint firstItem="Jsm-Ag-m7t" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="20" id="hBw-UQ-1nC"/>
@@ -122,7 +123,7 @@
                             <constraint firstItem="IQX-70-gES" firstAttribute="top" secondItem="Cgl-f7-VGU" secondAttribute="bottom" constant="40" id="haS-wy-rZZ"/>
                             <constraint firstItem="Cgl-f7-VGU" firstAttribute="top" secondItem="Jsm-Ag-m7t" secondAttribute="bottom" constant="40" id="lfH-pD-WeE"/>
                             <constraint firstItem="Pbb-nT-X9q" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="20" id="lwy-rH-s9J"/>
-                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="Pbb-nT-X9q" secondAttribute="bottom" constant="136" id="sEa-xG-ik0"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="Pbb-nT-X9q" secondAttribute="bottom" constant="150" id="sEa-xG-ik0"/>
                             <constraint firstItem="Jsm-Ag-m7t" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" constant="35" id="vNv-E1-Rui"/>
                             <constraint firstItem="IQX-70-gES" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="20" id="x1A-dz-pFu"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="Jsm-Ag-m7t" secondAttribute="trailing" constant="20" id="yLh-bM-VwR"/>
@@ -291,7 +292,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="O3n-9r-Jn4" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="580.91603053435108" y="758.45070422535218"/>
+            <point key="canvasLocation" x="581" y="1061"/>
         </scene>
         <!--Verificar Código SMS-->
         <scene sceneID="Dua-5j-gdi">
@@ -302,29 +303,29 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Ingresa el código de verificación" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="fCX-VD-82z">
-                                <rect key="frame" x="20" y="138" width="353" height="150"/>
+                                <rect key="frame" x="20" y="138" width="353" height="40"/>
                                 <constraints>
-                                    <constraint firstAttribute="height" constant="150" id="VhL-0e-NJu"/>
+                                    <constraint firstAttribute="height" constant="40" id="hrs-n1-YxS"/>
                                 </constraints>
-                                <fontDescription key="fontDescription" type="boldSystem" pointSize="21"/>
+                                <fontDescription key="fontDescription" type="boldSystem" pointSize="22"/>
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="k6F-eu-ne3">
-                                <rect key="frame" x="20" y="378" width="353" height="50"/>
+                                <rect key="frame" x="20" y="328" width="353" height="50"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="50" id="cwF-7O-aD2"/>
                                 </constraints>
                                 <state key="normal" title="Button"/>
-                                <buttonConfiguration key="configuration" style="filled" title="Verificar">
-                                    <fontDescription key="titleFontDescription" type="boldSystem" pointSize="29"/>
+                                <buttonConfiguration key="configuration" style="filled" title="📧 Verificar">
+                                    <fontDescription key="titleFontDescription" type="boldSystem" pointSize="24"/>
                                 </buttonConfiguration>
                                 <connections>
-                                    <action selector="verifyPressed:" destination="qk6-Px-Gjj" eventType="touchUpInside" id="xp3-ZP-YBC"/>
+                                    <action selector="verifyPressed:" destination="qk6-Px-Gjj" eventType="touchUpInside" id="XS0-E7-840"/>
                                 </connections>
                             </button>
                             <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Ingresa el código" textAlignment="center" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="DJt-mN-AGp">
-                                <rect key="frame" x="20" y="308" width="353" height="50"/>
+                                <rect key="frame" x="20" y="228" width="353" height="50"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="50" id="u9J-Te-dYY"/>
                                 </constraints>
@@ -335,20 +336,21 @@
                         <viewLayoutGuide key="safeArea" id="5vs-e8-Qdc"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
-                            <constraint firstItem="5vs-e8-Qdc" firstAttribute="trailing" secondItem="fCX-VD-82z" secondAttribute="trailing" constant="20" id="3MN-Ad-COd"/>
+                            <constraint firstItem="5vs-e8-Qdc" firstAttribute="trailing" secondItem="fCX-VD-82z" secondAttribute="trailing" constant="20" id="3zB-86-uWf"/>
                             <constraint firstItem="DJt-mN-AGp" firstAttribute="leading" secondItem="5vs-e8-Qdc" secondAttribute="leading" constant="20" id="4mG-Lq-vuc"/>
                             <constraint firstItem="5vs-e8-Qdc" firstAttribute="trailing" secondItem="k6F-eu-ne3" secondAttribute="trailing" constant="20" id="CmZ-NU-Ozm"/>
-                            <constraint firstItem="fCX-VD-82z" firstAttribute="top" secondItem="5vs-e8-Qdc" secondAttribute="top" constant="20" id="GgC-0q-VGd"/>
-                            <constraint firstItem="fCX-VD-82z" firstAttribute="leading" secondItem="5vs-e8-Qdc" secondAttribute="leading" constant="20" id="INs-Az-cUQ"/>
                             <constraint firstItem="k6F-eu-ne3" firstAttribute="leading" secondItem="5vs-e8-Qdc" secondAttribute="leading" constant="20" id="Q9C-qn-EhZ"/>
-                            <constraint firstItem="DJt-mN-AGp" firstAttribute="top" secondItem="fCX-VD-82z" secondAttribute="bottom" constant="20" id="WBp-rD-acv"/>
-                            <constraint firstItem="k6F-eu-ne3" firstAttribute="top" secondItem="DJt-mN-AGp" secondAttribute="bottom" constant="20" id="af8-ab-fgU"/>
+                            <constraint firstItem="DJt-mN-AGp" firstAttribute="top" secondItem="fCX-VD-82z" secondAttribute="bottom" constant="50" id="TDQ-id-zGC"/>
+                            <constraint firstItem="fCX-VD-82z" firstAttribute="top" secondItem="5vs-e8-Qdc" secondAttribute="top" constant="20" id="YKc-6c-33O"/>
+                            <constraint firstItem="k6F-eu-ne3" firstAttribute="top" secondItem="DJt-mN-AGp" secondAttribute="bottom" constant="50" id="af8-ab-fgU"/>
                             <constraint firstItem="5vs-e8-Qdc" firstAttribute="trailing" secondItem="DJt-mN-AGp" secondAttribute="trailing" constant="20" id="fZU-ET-Hcw"/>
+                            <constraint firstItem="fCX-VD-82z" firstAttribute="leading" secondItem="5vs-e8-Qdc" secondAttribute="leading" constant="20" id="gwA-Rb-GRl"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="0Sg-DG-h22"/>
                     <connections>
                         <outlet property="txtCode" destination="DJt-mN-AGp" id="EES-T8-sxi"/>
+                        <outlet property="verifyButton" destination="k6F-eu-ne3" id="Fxx-ZJ-uUe"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="ApZ-NY-6pP" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
@@ -1000,7 +1002,12 @@
                                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="AGY-CP-Wya">
                                                         <rect key="frame" x="0.0" y="0.0" width="338.33333333333331" height="34.333333333333336"/>
                                                         <state key="normal" title="Button"/>
-                                                        <buttonConfiguration key="configuration" style="plain" title="Ver Perfil"/>
+                                                        <buttonConfiguration key="configuration" style="plain" title="Ver Perfil">
+                                                            <backgroundConfiguration key="background">
+                                                                <color key="backgroundColor" systemColor="systemTealColor"/>
+                                                            </backgroundConfiguration>
+                                                            <color key="baseForegroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                        </buttonConfiguration>
                                                         <connections>
                                                             <action selector="profileButtonTapped:" destination="dGP-OD-z6r" eventType="touchUpInside" id="pEb-er-fBe"/>
                                                             <segue destination="oC4-oQ-Hj0" kind="presentation" identifier="ProfileViewController" modalPresentationStyle="fullScreen" id="8el-PV-ARJ"/>
@@ -1012,7 +1019,12 @@
                                                             <constraint firstAttribute="height" constant="35" id="t4m-Cp-4uP"/>
                                                         </constraints>
                                                         <state key="normal" title="Button"/>
-                                                        <buttonConfiguration key="configuration" style="plain" title="Sobre Nosotros"/>
+                                                        <buttonConfiguration key="configuration" style="plain" title="Sobre Nosotros">
+                                                            <backgroundConfiguration key="background">
+                                                                <color key="backgroundColor" systemColor="systemTealColor"/>
+                                                            </backgroundConfiguration>
+                                                            <color key="baseForegroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                        </buttonConfiguration>
                                                         <connections>
                                                             <action selector="aboutUsButtonTapped:" destination="dGP-OD-z6r" eventType="touchUpInside" id="aea-zr-soV"/>
                                                             <segue destination="Jbh-Ba-9DV" kind="presentation" modalPresentationStyle="fullScreen" id="VD5-Bf-iTZ"/>
@@ -1024,7 +1036,12 @@
                                                             <constraint firstAttribute="height" constant="35" id="fw0-3X-gbZ"/>
                                                         </constraints>
                                                         <state key="normal" title="Button"/>
-                                                        <buttonConfiguration key="configuration" style="plain" title="Cerrar Sesión"/>
+                                                        <buttonConfiguration key="configuration" style="plain" title="Cerrar Sesión">
+                                                            <backgroundConfiguration key="background">
+                                                                <color key="backgroundColor" systemColor="systemTealColor"/>
+                                                            </backgroundConfiguration>
+                                                            <color key="baseForegroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                        </buttonConfiguration>
                                                         <connections>
                                                             <action selector="logoutButtonTapped:" destination="dGP-OD-z6r" eventType="touchUpInside" id="GGa-0w-ST9"/>
                                                         </connections>
@@ -1037,7 +1054,7 @@
                                                     <constraint firstAttribute="height" constant="30" id="34Q-r4-rw8"/>
                                                 </constraints>
                                                 <fontDescription key="fontDescription" type="boldSystem" pointSize="24"/>
-                                                <color key="textColor" name="WidgetBackground"/>
+                                                <color key="textColor" systemColor="systemTealColor"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
                                         </subviews>
@@ -1067,11 +1084,14 @@
                                 <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <state key="normal" title="Button"/>
                                 <buttonConfiguration key="configuration" style="plain" title="☰">
+                                    <backgroundConfiguration key="background">
+                                        <color key="backgroundColor" systemColor="systemTealColor"/>
+                                    </backgroundConfiguration>
                                     <fontDescription key="titleFontDescription" type="boldSystem" pointSize="22"/>
                                 </buttonConfiguration>
                                 <userDefinedRuntimeAttributes>
                                     <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
-                                        <integer key="value" value="22"/>
+                                        <integer key="value" value="25"/>
                                     </userDefinedRuntimeAttribute>
                                 </userDefinedRuntimeAttributes>
                                 <connections>

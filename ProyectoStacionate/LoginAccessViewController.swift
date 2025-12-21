@@ -86,16 +86,20 @@ class LoginAccessViewController: UIViewController, CLLocationManagerDelegate, MK
         mapView.setUserTrackingMode(.followWithHeading, animated: true)
     }
     
+    
     // MARK: - Verificar sesión
-        func checkSession() {
-            guard let user = Auth.auth().currentUser else {
-                print("🚫 Acceso bloqueado: no autenticado")
-                goToLogin()
-                return
-            }
-
-            print("🔐 Usuario activo:", user.email ?? "")
+    func checkSession() {
+        if Auth.auth().currentUser != nil {
+            return
         }
+
+        if UserDefaults.standard.bool(forKey: "fakeLogin") {
+            return
+        }
+
+        goToLogin()
+    }
+
 
         // MARK: - Cargar datos
     func loadUserData() {

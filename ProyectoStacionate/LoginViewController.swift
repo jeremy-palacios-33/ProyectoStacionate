@@ -21,21 +21,16 @@ class LoginViewController: UIViewController {
     }
 
     // MARK: - UI
-    func setupUI() {
+    private func setupUI() {
 
         view.backgroundColor = .systemBackground
 
-        // Logo
         logoImageView.image = UIImage(named: "stacionate_logo")
         logoImageView.contentMode = .scaleAspectFit
 
-        // Segmented
         loginSegmented.selectedSegmentIndex = 1
-
-        // Password
         txtPassword.isSecureTextEntry = true
 
-        // Botones con emojis
         btnLogin.setTitle("👤 Continuar", for: .normal)
         btnNewUser.setTitle("📝 Crear cuenta", for: .normal)
 
@@ -51,51 +46,86 @@ class LoginViewController: UIViewController {
 
         txtLogin.text = ""
         txtPassword.text = ""
-        txtPassword.isHidden = selectedOption == "Número Telefónico"
+
+        if selectedOption == "Número Telefónico" {
+            txtLogin.placeholder = "Ingresa tu número telefónico"
+            txtPassword.isHidden = true
+        } else {
+            txtLogin.placeholder = "Ingresa tu correo electrónico"
+            txtPassword.isHidden = false
+        }
     }
+
 
     // MARK: - Login
     @IBAction func loginPressed(_ sender: UIButton) {
 
-        let email = txtLogin.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        let loginText = txtLogin.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
         let password = txtPassword.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
 
-        guard selectedOption == "Correo Electrónico" else {
-            showAlert(title: "⚠️ Aviso", message: "Login por teléfono no implementado")
+        if selectedOption == "Número Telefónico" {
+            handleFakePhoneLogin(phone: loginText)
             return
         }
 
-        guard isValidEmail(email) else {
-            showAlert(title: "📧 Correo inválido", message: "Ingresa un correo válido")
+        guard isValidEmail(loginText) else {
+            showAlert("📧 Correo inválido", "Ingresa un correo válido")
             return
         }
 
         guard !password.isEmpty else {
-            showAlert(title: "🔒 Contraseña vacía", message: "Ingresa tu contraseña")
+            showAlert("🔒 Contraseña vacía", "Ingresa tu contraseña")
             return
         }
 
-        Auth.auth().signIn(withEmail: email, password: password) { [weak self] _, error in
+        Auth.auth().signIn(withEmail: loginText, password: password) { [weak self] _, error in
             guard let self = self else { return }
 
-            if let error = error {
-                print("❌ Error login:", error.localizedDescription)
-                self.showAlert(title: "❌ Error", message: "Correo o contraseña incorrectos")
+            if error != nil {
+                self.showAlert("❌ Error", "Correo o contraseña incorrectos")
                 return
             }
 
-            guard Auth.auth().currentUser != nil else {
-                self.showAlert(title: "❌ Error", message: "No hay usuario autenticado")
-                return
-            }
-
-            print("✅ Login correcto")
-            self.goToPanel()
+            self.showSuccessAndGoPanel()
         }
     }
 
+    // MARK: - Fake Phone Login
+    private func handleFakePhoneLogin(phone: String) {
+
+        guard phone == "985680767" else {
+            showAlert("❌ Número inválido", "Ingrese un número registrado")
+            return
+        }
+
+        UserDefaults.standard.set("123456", forKey: "fakeVerificationCode")
+
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        let verifyVC = storyboard.instantiateViewController(
+            withIdentifier: "VerifyCodeViewController"
+        ) as! VerifyCodeViewController
+
+        verifyVC.phoneNumber = phone
+        verifyVC.modalPresentationStyle = .fullScreen
+        present(verifyVC, animated: true)
+    }
+
     // MARK: - Navegación
-    func goToPanel() {
+    private func showSuccessAndGoPanel() {
+        let alert = UIAlertController(
+            title: "Bienvenido 🎉",
+            message: "Inicio de sesión exitoso",
+            preferredStyle: .alert
+        )
+
+        alert.addAction(UIAlertAction(title: "Continuar 👤", style: .default) { _ in
+            self.goToPanel()
+        })
+
+        present(alert, animated: true)
+    }
+
+    private func goToPanel() {
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
         let panelVC = storyboard.instantiateViewController(
             withIdentifier: "LoginAccessViewController"
@@ -106,12 +136,12 @@ class LoginViewController: UIViewController {
     }
 
     // MARK: - Helpers
-    func isValidEmail(_ email: String) -> Bool {
+    private func isValidEmail(_ email: String) -> Bool {
         let pattern = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}"
         return NSPredicate(format: "SELF MATCHES %@", pattern).evaluate(with: email)
     }
 
-    func showAlert(title: String, message: String) {
+    private func showAlert(_ title: String, _ message: String) {
         let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "OK", style: .default))
         present(alert, animated: true)

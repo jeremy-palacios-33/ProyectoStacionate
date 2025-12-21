@@ -1,8 +1,3 @@
-//
-//  ChangePasswordViewController.swift
-//  ProyectoStacionate
-//
-
 import UIKit
 import FirebaseAuth
 
