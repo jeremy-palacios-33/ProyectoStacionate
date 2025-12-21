@@ -26,8 +26,14 @@ class ChangePasswordViewController: UIViewController {
     // MARK: - Setup UI
     private func setupUI() {
         // Email (solo lectura)
+        emailTextField.text = Auth.auth().currentUser?.email
         emailTextField.isUserInteractionEnabled = false
-        emailTextField.textColor = .gray
+        emailTextField.textColor = .secondaryLabel
+        emailTextField.backgroundColor = UIColor.systemGray6
+        emailTextField.layer.cornerRadius = 8
+        emailTextField.layer.borderWidth = 1
+        emailTextField.layer.borderColor = UIColor.systemGray4.cgColor
+
 
         // Passwords
         newPasswordTextField.isSecureTextEntry = true

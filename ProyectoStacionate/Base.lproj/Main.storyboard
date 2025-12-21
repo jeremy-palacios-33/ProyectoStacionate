@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="23727" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="oC4-oQ-Hj0">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="23727" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="Jbh-Ba-9DV">
     <device id="retina6_12" orientation="portrait" appearance="light"/>
     <dependencies>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23721"/>
@@ -337,10 +337,10 @@
                                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                                         <subviews>
                                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillEqually" spacing="12" translatesAutoresizingMaskIntoConstraints="NO" id="bke-D4-yDl">
-                                                <rect key="frame" x="20" y="626" width="353" height="138"/>
+                                                <rect key="frame" x="20" y="626" width="353" height="156"/>
                                                 <subviews>
                                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="wkL-bj-FGq">
-                                                        <rect key="frame" x="0.0" y="0.0" width="353" height="38"/>
+                                                        <rect key="frame" x="0.0" y="0.0" width="353" height="44"/>
                                                         <color key="backgroundColor" name="WidgetBackground"/>
                                                         <state key="normal" title="Button"/>
                                                         <buttonConfiguration key="configuration" style="tinted" title="✏️  Editar perfil   ">
@@ -358,7 +358,7 @@
                                                         </connections>
                                                     </button>
                                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="3Qq-EX-0DW">
-                                                        <rect key="frame" x="0.0" y="50" width="353" height="38"/>
+                                                        <rect key="frame" x="0.0" y="56" width="353" height="44"/>
                                                         <color key="backgroundColor" systemColor="secondaryLabelColor"/>
                                                         <state key="normal" title="Button"/>
                                                         <buttonConfiguration key="configuration" style="tinted" title="🔐  Cambiar contraseña">
@@ -376,7 +376,7 @@
                                                         </connections>
                                                     </button>
                                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="OWa-i6-dvS">
-                                                        <rect key="frame" x="0.0" y="100" width="353" height="38"/>
+                                                        <rect key="frame" x="0.0" y="112" width="353" height="44"/>
                                                         <color key="backgroundColor" systemColor="systemRedColor"/>
                                                         <state key="normal" title="Button"/>
                                                         <buttonConfiguration key="configuration" style="tinted" title="🚪  Sallir ">
@@ -411,7 +411,7 @@
                                                 <rect key="frame" x="20" y="136" width="353" height="136"/>
                                                 <subviews>
                                                     <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="jK0-w2-Q5S">
-                                                        <rect key="frame" x="50" y="0.0" width="253" height="100"/>
+                                                        <rect key="frame" x="60" y="0.0" width="233" height="100"/>
                                                         <constraints>
                                                             <constraint firstAttribute="height" constant="100" id="6dG-wS-ASd"/>
                                                         </constraints>
@@ -432,8 +432,8 @@
                                                     </label>
                                                 </subviews>
                                                 <constraints>
-                                                    <constraint firstAttribute="trailing" secondItem="jK0-w2-Q5S" secondAttribute="trailing" constant="50" id="3a6-UX-6i1"/>
-                                                    <constraint firstItem="jK0-w2-Q5S" firstAttribute="leading" secondItem="bvc-bg-P11" secondAttribute="leading" constant="50" id="bCO-wL-4FZ"/>
+                                                    <constraint firstAttribute="trailing" secondItem="jK0-w2-Q5S" secondAttribute="trailing" constant="60" id="3a6-UX-6i1"/>
+                                                    <constraint firstItem="jK0-w2-Q5S" firstAttribute="leading" secondItem="bvc-bg-P11" secondAttribute="leading" constant="60" id="bCO-wL-4FZ"/>
                                                 </constraints>
                                             </stackView>
                                             <stackView opaque="NO" contentMode="scaleToFill" fixedFrame="YES" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="fgI-UD-mAU">
@@ -495,6 +495,7 @@
                                         <constraints>
                                             <constraint firstItem="bke-D4-yDl" firstAttribute="leading" secondItem="hBd-gl-ZAS" secondAttribute="leading" constant="20" id="2aF-n2-Ca6"/>
                                             <constraint firstItem="bvc-bg-P11" firstAttribute="leading" secondItem="hBd-gl-ZAS" secondAttribute="leading" constant="20" id="3a1-D0-qFF"/>
+                                            <constraint firstAttribute="bottom" secondItem="bke-D4-yDl" secondAttribute="bottom" constant="70" id="6MK-tE-2YZ"/>
                                             <constraint firstItem="t87-Gy-Fjk" firstAttribute="top" secondItem="hBd-gl-ZAS" secondAttribute="top" constant="70" id="8B7-zY-qHY"/>
                                             <constraint firstItem="v8V-Xb-ldw" firstAttribute="leading" secondItem="hBd-gl-ZAS" secondAttribute="leading" constant="20" id="CGi-vf-X9T"/>
                                             <constraint firstAttribute="trailing" secondItem="bke-D4-yDl" secondAttribute="trailing" constant="20" id="P3c-iL-a5X"/>
@@ -559,7 +560,7 @@
                                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                                         <subviews>
                                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="0LL-KB-9ds">
-                                                <rect key="frame" x="50" y="145" width="293" height="100"/>
+                                                <rect key="frame" x="80" y="145" width="233" height="100"/>
                                                 <constraints>
                                                     <constraint firstAttribute="height" constant="100" id="2EM-tW-Wvd"/>
                                                 </constraints>
@@ -689,11 +690,11 @@
                                             <constraint firstItem="9hi-PX-U66" firstAttribute="leading" secondItem="EVN-3j-pw7" secondAttribute="leading" constant="20" id="SeC-9c-S2d"/>
                                             <constraint firstAttribute="height" constant="852" id="aNo-t1-GQ5"/>
                                             <constraint firstAttribute="trailing" secondItem="jyL-jd-hO8" secondAttribute="trailing" constant="20" id="gfK-ET-Lch"/>
-                                            <constraint firstItem="0LL-KB-9ds" firstAttribute="leading" secondItem="EVN-3j-pw7" secondAttribute="leading" constant="50" id="ghw-MZ-RaI"/>
+                                            <constraint firstItem="0LL-KB-9ds" firstAttribute="leading" secondItem="EVN-3j-pw7" secondAttribute="leading" constant="80" id="ghw-MZ-RaI"/>
                                             <constraint firstItem="9hi-PX-U66" firstAttribute="top" secondItem="jyL-jd-hO8" secondAttribute="bottom" constant="50" id="m6M-my-mSy"/>
                                             <constraint firstAttribute="trailing" secondItem="RJu-xB-3MG" secondAttribute="trailing" constant="20" id="mOY-S0-6Vm"/>
                                             <constraint firstItem="RJu-xB-3MG" firstAttribute="leading" secondItem="EVN-3j-pw7" secondAttribute="leading" constant="20" id="p90-hD-16R"/>
-                                            <constraint firstAttribute="trailing" secondItem="0LL-KB-9ds" secondAttribute="trailing" constant="50" id="wLD-bt-ZA7"/>
+                                            <constraint firstAttribute="trailing" secondItem="0LL-KB-9ds" secondAttribute="trailing" constant="80" id="wLD-bt-ZA7"/>
                                         </constraints>
                                     </view>
                                 </subviews>
@@ -985,6 +986,7 @@
                                                         <buttonConfiguration key="configuration" style="plain" title="Sobre Nosotros"/>
                                                         <connections>
                                                             <action selector="scheduleButtonTapped:" destination="dGP-OD-z6r" eventType="touchUpInside" id="y3T-oX-9fb"/>
+                                                            <segue destination="Jbh-Ba-9DV" kind="presentation" modalPresentationStyle="fullScreen" id="VD5-Bf-iTZ"/>
                                                         </connections>
                                                     </button>
                                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="b7v-vO-lvc">
@@ -996,6 +998,7 @@
                                                         <buttonConfiguration key="configuration" style="plain" title="Ajustes"/>
                                                         <connections>
                                                             <action selector="settingsButtonTapped:" destination="dGP-OD-z6r" eventType="touchUpInside" id="wiI-Cm-BUs"/>
+                                                            <segue destination="g7e-bN-iap" kind="presentation" modalPresentationStyle="fullScreen" id="Wh0-4d-vlf"/>
                                                         </connections>
                                                     </button>
                                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Gwm-Lx-TT4">
@@ -1217,10 +1220,10 @@
             </objects>
             <point key="canvasLocation" x="-312" y="32"/>
         </scene>
-        <!--View Controller-->
+        <!--About Us View Controller-->
         <scene sceneID="iuk-GM-W57">
             <objects>
-                <viewController id="Jbh-Ba-9DV" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="AboutUsViewController" id="Jbh-Ba-9DV" customClass="AboutUsViewController" customModule="ProyectoStacionate" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="hxJ-fm-MXj">
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -1230,9 +1233,152 @@
                                 <subviews>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="1PT-rk-BvF">
                                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
+                                        <subviews>
+                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Sobre Nosotros" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="iMp-FD-W00">
+                                                <rect key="frame" x="20" y="70" width="353" height="30"/>
+                                                <constraints>
+                                                    <constraint firstAttribute="height" constant="30" id="zm3-Kh-NRv"/>
+                                                </constraints>
+                                                <fontDescription key="fontDescription" type="boldSystem" pointSize="25"/>
+                                                <color key="textColor" name="WidgetBackground"/>
+                                                <nil key="highlightedColor"/>
+                                            </label>
+                                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="10" translatesAutoresizingMaskIntoConstraints="NO" id="whx-Xv-ITb">
+                                                <rect key="frame" x="20" y="159" width="353" height="556"/>
+                                                <subviews>
+                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Aplicación Stacionate" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="PZk-5q-DJL">
+                                                        <rect key="frame" x="0.0" y="0.0" width="353" height="23"/>
+                                                        <constraints>
+                                                            <constraint firstAttribute="height" constant="23" id="hNB-tV-0lB"/>
+                                                        </constraints>
+                                                        <fontDescription key="fontDescription" style="UICTFontTextStyleTitle1"/>
+                                                        <nil key="textColor"/>
+                                                        <nil key="highlightedColor"/>
+                                                    </label>
+                                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="HGh-uR-Mxp">
+                                                        <rect key="frame" x="0.0" y="32.999999999999993" width="353" height="96.333333333333314"/>
+                                                    </imageView>
+                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="📌 ¿Qué es Stacionate?" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="U8T-Jl-jJf">
+                                                        <rect key="frame" x="0.0" y="139.33333333333331" width="353" height="21.666666666666657"/>
+                                                        <constraints>
+                                                            <constraint firstAttribute="height" constant="21.670000000000002" id="bDH-eY-6fH"/>
+                                                        </constraints>
+                                                        <fontDescription key="fontDescription" type="boldSystem" pointSize="18"/>
+                                                        <color key="textColor" name="WidgetBackground"/>
+                                                        <nil key="highlightedColor"/>
+                                                    </label>
+                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="6Pt-oi-O4f">
+                                                        <rect key="frame" x="0.0" y="171" width="353" height="89.666666666666686"/>
+                                                        <constraints>
+                                                            <constraint firstAttribute="height" constant="89.670000000000002" id="zVq-3Y-J8Y"/>
+                                                        </constraints>
+                                                        <string key="text">Stacionate conecta a conductores con espacios disponibles para estacionar, permitiendo que los usuarios compartan información útil y actualizada para facilitar una experiencia de estacionamiento más rápida, eficiente y colaborativa.</string>
+                                                        <fontDescription key="fontDescription" type="italicSystem" pointSize="15"/>
+                                                        <nil key="textColor"/>
+                                                        <nil key="highlightedColor"/>
+                                                    </label>
+                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="🎯 Finalidad de la Aplicación" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="q9g-ED-uHr">
+                                                        <rect key="frame" x="0.0" y="270.66666666666669" width="353" height="21.666666666666686"/>
+                                                        <constraints>
+                                                            <constraint firstAttribute="height" constant="21.670000000000002" id="k3e-SU-gqa"/>
+                                                        </constraints>
+                                                        <fontDescription key="fontDescription" type="boldSystem" pointSize="18"/>
+                                                        <color key="textColor" name="WidgetBackground"/>
+                                                        <nil key="highlightedColor"/>
+                                                    </label>
+                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="aiy-Ke-sj2">
+                                                        <rect key="frame" x="0.0" y="302.33333333333331" width="353" height="107.66666666666669"/>
+                                                        <constraints>
+                                                            <constraint firstAttribute="height" constant="107.67" id="HDj-bB-dTX"/>
+                                                        </constraints>
+                                                        <string key="text">La finalidad de Stacionate es reducir el tiempo y la frustración que enfrentan los conductores al buscar estacionamiento, fomentando una comunidad donde los usuarios colaboran activamente compartiendo información confiable para beneficio de todos.</string>
+                                                        <fontDescription key="fontDescription" type="italicSystem" pointSize="15"/>
+                                                        <nil key="textColor"/>
+                                                        <nil key="highlightedColor"/>
+                                                    </label>
+                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="👨‍💻 Desarrollado por" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="9bb-q3-nFb">
+                                                        <rect key="frame" x="0.0" y="420" width="353" height="21.666666666666686"/>
+                                                        <constraints>
+                                                            <constraint firstAttribute="height" constant="21.670000000000002" id="xQo-WZ-clv"/>
+                                                        </constraints>
+                                                        <fontDescription key="fontDescription" type="boldSystem" pointSize="18"/>
+                                                        <color key="textColor" name="WidgetBackground"/>
+                                                        <nil key="highlightedColor"/>
+                                                    </label>
+                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="- Jeremy Palacios Bustillos" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="NUr-fe-nbU">
+                                                        <rect key="frame" x="0.0" y="451.66666666666663" width="353" height="18"/>
+                                                        <constraints>
+                                                            <constraint firstAttribute="height" constant="18" id="Z8k-Xo-Unh"/>
+                                                        </constraints>
+                                                        <fontDescription key="fontDescription" type="italicSystem" pointSize="15"/>
+                                                        <nil key="textColor"/>
+                                                        <nil key="highlightedColor"/>
+                                                    </label>
+                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="- Marchelo Cortabrazos Rios" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="MZl-A9-zGV">
+                                                        <rect key="frame" x="0.0" y="479.66666666666663" width="353" height="18"/>
+                                                        <constraints>
+                                                            <constraint firstAttribute="height" constant="18" id="4SN-71-qdI"/>
+                                                        </constraints>
+                                                        <fontDescription key="fontDescription" type="italicSystem" pointSize="15"/>
+                                                        <nil key="textColor"/>
+                                                        <nil key="highlightedColor"/>
+                                                    </label>
+                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="- Jhenny Rumay Casas" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="UYi-gq-Y8K">
+                                                        <rect key="frame" x="0.0" y="507.66666666666663" width="353" height="18"/>
+                                                        <constraints>
+                                                            <constraint firstAttribute="height" constant="18" id="PAo-26-h61"/>
+                                                        </constraints>
+                                                        <fontDescription key="fontDescription" type="italicSystem" pointSize="15"/>
+                                                        <nil key="textColor"/>
+                                                        <nil key="highlightedColor"/>
+                                                    </label>
+                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="🛠️ Versión 1.0.0" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="2fd-AW-Jfg">
+                                                        <rect key="frame" x="0.0" y="535.66666666666663" width="353" height="20.333333333333371"/>
+                                                        <constraints>
+                                                            <constraint firstAttribute="height" constant="20.329999999999998" id="T30-TY-ROP"/>
+                                                        </constraints>
+                                                        <fontDescription key="fontDescription" type="boldSystem" pointSize="18"/>
+                                                        <color key="textColor" name="WidgetBackground"/>
+                                                        <nil key="highlightedColor"/>
+                                                    </label>
+                                                </subviews>
+                                                <constraints>
+                                                    <constraint firstAttribute="height" constant="556" id="eLa-lw-4qS"/>
+                                                </constraints>
+                                            </stackView>
+                                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="mzG-5I-QdF">
+                                                <rect key="frame" x="20" y="744" width="353" height="38"/>
+                                                <color key="backgroundColor" systemColor="secondaryLabelColor"/>
+                                                <constraints>
+                                                    <constraint firstAttribute="height" constant="38" id="OyN-gs-2IB"/>
+                                                </constraints>
+                                                <state key="normal" title="Button"/>
+                                                <buttonConfiguration key="configuration" style="tinted" title="⬅️   Volver ">
+                                                    <fontDescription key="titleFontDescription" type="boldSystem" pointSize="20"/>
+                                                    <color key="baseForegroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                </buttonConfiguration>
+                                                <userDefinedRuntimeAttributes>
+                                                    <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
+                                                        <integer key="value" value="15"/>
+                                                    </userDefinedRuntimeAttribute>
+                                                </userDefinedRuntimeAttributes>
+                                                <connections>
+                                                    <action selector="backProfileButtonTapped:" destination="oC4-oQ-Hj0" eventType="touchUpInside" id="4E4-q6-Mbw"/>
+                                                </connections>
+                                            </button>
+                                        </subviews>
                                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                         <constraints>
                                             <constraint firstAttribute="height" constant="852" id="3Mf-ic-qTS"/>
+                                            <constraint firstAttribute="trailing" secondItem="iMp-FD-W00" secondAttribute="trailing" constant="20" id="7Ap-hw-7Ym"/>
+                                            <constraint firstItem="whx-Xv-ITb" firstAttribute="leading" secondItem="1PT-rk-BvF" secondAttribute="leading" constant="20" id="DH6-bE-VhR"/>
+                                            <constraint firstAttribute="trailing" secondItem="whx-Xv-ITb" secondAttribute="trailing" constant="20" id="Dwe-2h-Edi"/>
+                                            <constraint firstAttribute="trailing" secondItem="mzG-5I-QdF" secondAttribute="trailing" constant="20" id="G0g-uH-z0H"/>
+                                            <constraint firstAttribute="bottom" secondItem="mzG-5I-QdF" secondAttribute="bottom" constant="70" id="IWS-wN-izn"/>
+                                            <constraint firstItem="iMp-FD-W00" firstAttribute="top" secondItem="1PT-rk-BvF" secondAttribute="top" constant="70" id="Kgg-lU-qhJ"/>
+                                            <constraint firstItem="iMp-FD-W00" firstAttribute="leading" secondItem="1PT-rk-BvF" secondAttribute="leading" constant="20" id="XOo-te-Xwi"/>
+                                            <constraint firstItem="mzG-5I-QdF" firstAttribute="leading" secondItem="1PT-rk-BvF" secondAttribute="leading" constant="20" id="ahK-dv-if4"/>
+                                            <constraint firstItem="mzG-5I-QdF" firstAttribute="top" secondItem="whx-Xv-ITb" secondAttribute="bottom" constant="29" id="w4e-Tx-xAI"/>
                                         </constraints>
                                     </view>
                                 </subviews>
@@ -1254,10 +1400,14 @@
                             <constraint firstItem="TKl-ZK-lNU" firstAttribute="top" secondItem="hxJ-fm-MXj" secondAttribute="top" id="Ttc-sA-AV4"/>
                         </constraints>
                     </view>
+                    <connections>
+                        <outlet property="appNameLabel" destination="U8T-Jl-jJf" id="hEr-9x-Vgr"/>
+                        <outlet property="titleLabel" destination="PZk-5q-DJL" id="R9c-ei-JXf"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="PR6-Jv-UQd" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1569" y="996"/>
+            <point key="canvasLocation" x="1568.7022900763359" y="1060.5633802816901"/>
         </scene>
         <!--View Controller-->
         <scene sceneID="GeD-Cr-UuF">
@@ -1299,7 +1449,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="SD1-X0-P4W" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="2393" y="996"/>
+            <point key="canvasLocation" x="2393" y="1061"/>
         </scene>
     </scenes>
     <resources>
