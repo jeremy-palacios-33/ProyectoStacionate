@@ -1,57 +1,91 @@
+//
+//  AboutUsViewController.swift
+//  ProyectoStacionate
+//
+//  Created by DAMII on 21/12/25.
+//
+
 import UIKit
 
 class AboutUsViewController: UIViewController {
 
-    @IBOutlet weak var titleLabel: UILabel!
+    // MARK: - IBOutlets
+
+    @IBOutlet weak var imageView: UIImageView!
+
     @IBOutlet weak var appNameLabel: UILabel!
-    @IBOutlet weak var descriptionTextView: UITextView!
-    @IBOutlet weak var purposeTextView: UITextView!
+    @IBOutlet weak var appNameDescriptionLabel: UILabel!
+
+    @IBOutlet weak var appPurposeLabel: UILabel!
+    @IBOutlet weak var appPurposeDescriptionLabel: UILabel!
+
+    @IBOutlet weak var appDevelopedLabel: UILabel!
+    @IBOutlet weak var appDevelopedOneLabel: UILabel!
+    @IBOutlet weak var appDevelopedTwoLabel: UILabel!
+    @IBOutlet weak var appDevelopedThreeLabel: UILabel!
+
     @IBOutlet weak var versionLabel: UILabel!
     @IBOutlet weak var backButton: UIButton!
 
+    // MARK: - Lifecycle
+
     override func viewDidLoad() {
         super.viewDidLoad()
-        setupUI()
+        configureUI()
         loadContent()
     }
 
-    private func setupUI() {
-        titleLabel.text = "About Us"
-        titleLabel.font = .boldSystemFont(ofSize: 22)
+    // MARK: - UI Configuration
 
-        appNameLabel.text = "Stacionate"
+    private func configureUI() {
+
+        view.backgroundColor = .systemBackground
+
         appNameLabel.font = .boldSystemFont(ofSize: 18)
+        appPurposeLabel.font = .boldSystemFont(ofSize: 18)
+        appDevelopedLabel.font = .boldSystemFont(ofSize: 18)
 
-        configureTextView(descriptionTextView)
-        configureTextView(purposeTextView)
+        appNameDescriptionLabel.numberOfLines = 0
+        appPurposeDescriptionLabel.numberOfLines = 0
 
-        backButton.layer.cornerRadius = 8
+        imageView.contentMode = .scaleAspectFit
+        imageView.layer.cornerRadius = 12
+        imageView.clipsToBounds = true
+
+        backButton.layer.cornerRadius = 10
     }
 
-    private func configureTextView(_ textView: UITextView) {
-        textView.isEditable = false
-        textView.isScrollEnabled = false
-        textView.backgroundColor = .clear
-        textView.textAlignment = .justified
-        textView.font = .systemFont(ofSize: 15)
-    }
+    // MARK: - Load Content
 
     private func loadContent() {
-        descriptionTextView.text =
-        """
-        Stacionate is a mobile application designed to help drivers find available parking spaces quickly and easily. The platform allows users to share real-time parking information, creating a collaborative and reliable community.
-        """
 
-        purposeTextView.text =
-        """
-        The main purpose of Stacionate is to reduce the time and frustration drivers experience when searching for parking. By encouraging users to provide feedback and updates, the app improves urban mobility and benefits the entire community.
-        """
+        if let image = UIImage(named: "stacionate_logo") {
+            imageView.image = image
+        } else {
+            print("❌ Imagen stacionate_logo no encontrada en Assets")
+        }
 
-        versionLabel.text = "Version 1.0.0"
+        appNameLabel.text = "📌 ¿Qué es Stacionate?"
+        appNameDescriptionLabel.text =
+        "Stacionate conecta a conductores con espacios disponibles para estacionar, permitiendo que los usuarios compartan información útil y actualizada para facilitar una experiencia de estacionamiento más rápida, eficiente y colaborativa."
+
+        appPurposeLabel.text = "🎯 Finalidad de la Aplicación"
+        appPurposeDescriptionLabel.text =
+        "La finalidad de Stacionate es reducir el tiempo y la frustración que enfrentan los conductores al buscar estacionamiento, fomentando una comunidad donde los usuarios colaboran activamente compartiendo información confiable para beneficio de todos."
+
+        appDevelopedLabel.text = "👨‍💻 Desarrollado por"
+        appDevelopedOneLabel.text = "• Jeremy Palacios"
+        appDevelopedTwoLabel.text = "• Marchelo Cortabrazos"
+        appDevelopedThreeLabel.text = "• Jhenny Rumay"
+
+        versionLabel.text = "🛠️ Versión 1.0.0"
     }
+
+    // MARK: - Actions
 
     @IBAction func backButtonTapped(_ sender: UIButton) {
         dismiss(animated: true)
-        // o navigationController?.popViewController(animated: true)
     }
+
+
 }

@@ -4,6 +4,7 @@ import FirebaseAuth
 class LoginViewController: UIViewController {
 
     // MARK: - Outlets
+    @IBOutlet weak var logoImageView: UIImageView!
     @IBOutlet weak var loginSegmented: UISegmentedControl!
     @IBOutlet weak var txtLogin: UITextField!
     @IBOutlet weak var txtPassword: UITextField!
@@ -21,8 +22,25 @@ class LoginViewController: UIViewController {
 
     // MARK: - UI
     func setupUI() {
+
+        view.backgroundColor = .systemBackground
+
+        // Logo
+        logoImageView.image = UIImage(named: "stacionate_logo")
+        logoImageView.contentMode = .scaleAspectFit
+
+        // Segmented
         loginSegmented.selectedSegmentIndex = 1
+
+        // Password
         txtPassword.isSecureTextEntry = true
+
+        // Botones con emojis
+        btnLogin.setTitle("👤 Continuar", for: .normal)
+        btnNewUser.setTitle("📝 Crear cuenta", for: .normal)
+
+        btnLogin.layer.cornerRadius = 10
+        btnNewUser.layer.cornerRadius = 10
     }
 
     // MARK: - Segmented
@@ -43,17 +61,17 @@ class LoginViewController: UIViewController {
         let password = txtPassword.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
 
         guard selectedOption == "Correo Electrónico" else {
-            showAlert(title: "Aviso", message: "Login por teléfono no implementado")
+            showAlert(title: "⚠️ Aviso", message: "Login por teléfono no implementado")
             return
         }
 
         guard isValidEmail(email) else {
-            showAlert(title: "Correo inválido", message: "Ingresa un correo válido")
+            showAlert(title: "📧 Correo inválido", message: "Ingresa un correo válido")
             return
         }
 
         guard !password.isEmpty else {
-            showAlert(title: "Contraseña vacía", message: "Ingresa tu contraseña")
+            showAlert(title: "🔒 Contraseña vacía", message: "Ingresa tu contraseña")
             return
         }
 
@@ -62,18 +80,16 @@ class LoginViewController: UIViewController {
 
             if let error = error {
                 print("❌ Error login:", error.localizedDescription)
-                self.showAlert(title: "Error", message: "Correo o contraseña incorrectos")
+                self.showAlert(title: "❌ Error", message: "Correo o contraseña incorrectos")
                 return
             }
 
-            // 🔐 Validación FINAL
             guard Auth.auth().currentUser != nil else {
-                self.showAlert(title: "Error", message: "No hay usuario autenticado")
+                self.showAlert(title: "❌ Error", message: "No hay usuario autenticado")
                 return
             }
 
             print("✅ Login correcto")
-
             self.goToPanel()
         }
     }
@@ -107,6 +123,7 @@ class LoginViewController: UIViewController {
         let registerVC = storyboard.instantiateViewController(
             withIdentifier: "RegisterViewController"
         )
+        registerVC.modalPresentationStyle = .fullScreen
         present(registerVC, animated: true)
     }
 }

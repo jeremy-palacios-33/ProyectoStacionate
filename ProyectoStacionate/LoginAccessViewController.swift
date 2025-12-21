@@ -24,8 +24,7 @@ class LoginAccessViewController: UIViewController, CLLocationManagerDelegate, MK
     
     @IBOutlet weak var userNameLabel: UILabel!
     @IBOutlet weak var profileButton: UIButton!
-    @IBOutlet weak var scheduleButton: UIButton!
-    @IBOutlet weak var settingsButton: UIButton!
+    @IBOutlet weak var aboutUsButton: UIButton!
     @IBOutlet weak var logoutButton: UIButton!
     
     @IBOutlet weak var cancelRouteButton: UIButton!
@@ -167,11 +166,10 @@ class LoginAccessViewController: UIViewController, CLLocationManagerDelegate, MK
 
         // Configurar botones
         profileButton.setTitle("Ver Perfil", for: .normal)
-        scheduleButton.setTitle("Sobre Nosotros", for: .normal)
-        settingsButton.setTitle("Ajustes", for: .normal)
+        aboutUsButton.setTitle("Sobre Nosotros", for: .normal)
         logoutButton.setTitle("Cerrar sesión", for: .normal)
 
-        [profileButton, scheduleButton, settingsButton, logoutButton].forEach { btn in
+        [profileButton, aboutUsButton, logoutButton].forEach { btn in
             btn.layer.cornerRadius = 8
             btn.backgroundColor = UIColor.systemBlue
             btn.tintColor = .white
@@ -193,10 +191,17 @@ class LoginAccessViewController: UIViewController, CLLocationManagerDelegate, MK
 
 
 
-    @IBAction func scheduleButtonTapped(_ sender: UIButton) {
-        print("Programar Viaje")
-        // Abrir pantalla de programación de viaje
+    @IBAction func aboutUsButtonTapped(_ sender: UIButton) {
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        let aboutVC = storyboard.instantiateViewController(
+            withIdentifier: "AboutUsViewController"
+        )
+
+        aboutVC.modalPresentationStyle = .fullScreen
+        present(aboutVC, animated: true)
     }
+
+
 
     @IBAction func settingsButtonTapped(_ sender: UIButton) {
         print("Ajustes")
